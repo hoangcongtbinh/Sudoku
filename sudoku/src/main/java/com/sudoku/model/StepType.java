@@ -1,7 +1,9 @@
 package com.sudoku.model;
 
 public enum StepType {
-    SET,
+    INPUT,
     CLEAR,
-    BACKTRACK
+    UNDO,
+    HINT,
+    SOLVER_STEP
 }
