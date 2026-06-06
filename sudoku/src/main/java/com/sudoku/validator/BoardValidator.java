@@ -8,42 +8,66 @@ import com.sudoku.model.Step;
 
 public class BoardValidator {
     public static boolean isValidMove(Board board, Step step) {
-        if (board == null || step == null) {
-            return false;
-        }
-
-        return isValidMove(board, step.getRow(), step.getCol(), step.getValue());
+        return validateMove(board, step).isValid();
     }
 
     public static boolean isValidMove(Board board, int row, int col, int value) {
-        if (board == null || !isValidPosition(row, col) || !isValidValue(value)) {
-            return false;
-        }
-
-        if (value == Board.getEmptyValue()) {
-            return true;
-        }
-
-        return isValidInRow(board, row, col, value)
-                && isValidInColumn(board, row, col, value)
-                && isValidInBox(board, row, col, value);
+        return validateMove(board, row, col, value).isValid();
     }
 
-    public static boolean isSolved(Board board) {
-        if (board == null || !board.isFull()) {
-            return false;
+    public static ValidationResult validateMove(Board board, Step step) {
+        if (step == null) {
+            return invalid("Step must not be null.", -1, -1, -1, -1);
         }
 
-        for (int row = 0; row < Board.getSize(); row++) {
-            for (int col = 0; col < Board.getSize(); col++) {
-                int value = board.getCell(row, col);
-                if (!isValidMove(board, row, col, value)) {
-                    return false;
+        return validateMove(board, step.getRow(), step.getCol(), step.getValue());
+    }
+
+    public static ValidationResult validateMove(Board board, int row, int col, int value) {
+        if (board == null) {
+            return invalid("Board must not be null.", row, col, -1, -1);
+        }
+        if (!isValidPosition(row, col)) {
+            return invalid("Row and column must be from 0 to 8.", row, col, -1, -1);
+        }
+        if (!isValidValue(value)) {
+            return invalid("Cell value must be from 0 to 9.", row, col, -1, -1);
+        }
+        if (value == Board.getEmptyValue()) {
+            return valid(row, col);
+        }
+
+        for (int checkedCol = 0; checkedCol < Board.getSize(); checkedCol++) {
+            if (checkedCol != col && board.getCell(row, checkedCol) == value) {
+                return invalid("Value already exists in the same row.",
+                        row, col, row, checkedCol);
+            }
+        }
+
+        for (int checkedRow = 0; checkedRow < Board.getSize(); checkedRow++) {
+            if (checkedRow != row && board.getCell(checkedRow, col) == value) {
+                return invalid("Value already exists in the same column.",
+                        row, col, checkedRow, col);
+            }
+        }
+
+        int boxStartRow = row - row % 3;
+        int boxStartCol = col - col % 3;
+        for (int checkedRow = boxStartRow; checkedRow < boxStartRow + 3; checkedRow++) {
+            for (int checkedCol = boxStartCol; checkedCol < boxStartCol + 3; checkedCol++) {
+                if ((checkedRow != row || checkedCol != col)
+                        && board.getCell(checkedRow, checkedCol) == value) {
+                    return invalid("Value already exists in the same 3x3 box.",
+                            row, col, checkedRow, checkedCol);
                 }
             }
         }
 
-        return true;
+        return valid(row, col);
+    }
+
+    public static boolean isSolved(Board board) {
+        return board != null && board.isFull() && validateBoard(board).isValid();
     }
 
     public static List<Integer> getCandidates(Board board, int row, int col) {
@@ -62,53 +86,27 @@ public class BoardValidator {
     }
 
     public static boolean isValidBoard(Board board) {
+        return validateBoard(board).isValid();
+    }
+
+    public static ValidationResult validateBoard(Board board) {
         if (board == null) {
-            return false;
+            return invalid("Board must not be null.", -1, -1, -1, -1);
         }
 
         for (int row = 0; row < Board.getSize(); row++) {
             for (int col = 0; col < Board.getSize(); col++) {
                 int value = board.getCell(row, col);
-                if (value != Board.getEmptyValue() && !isValidMove(board, row, col, value)) {
-                    return false;
+                if (value != Board.getEmptyValue()) {
+                    ValidationResult result = validateMove(board, row, col, value);
+                    if (!result.isValid()) {
+                        return result;
+                    }
                 }
             }
         }
 
-        return true;
-    }
-
-    private static boolean isValidInRow(Board board, int row, int currentCol, int value) {
-        for (int col = 0; col < Board.getSize(); col++) {
-            if (col != currentCol && board.getCell(row, col) == value) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isValidInColumn(Board board, int currentRow, int col, int value) {
-        for (int row = 0; row < Board.getSize(); row++) {
-            if (row != currentRow && board.getCell(row, col) == value) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isValidInBox(Board board, int currentRow, int currentCol, int value) {
-        int boxStartRow = currentRow - currentRow % 3;
-        int boxStartCol = currentCol - currentCol % 3;
-
-        for (int row = boxStartRow; row < boxStartRow + 3; row++) {
-            for (int col = boxStartCol; col < boxStartCol + 3; col++) {
-                if ((row != currentRow || col != currentCol) && board.getCell(row, col) == value) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return valid(-1, -1);
     }
 
     private static boolean isValidPosition(int row, int col) {
@@ -117,5 +115,19 @@ public class BoardValidator {
 
     private static boolean isValidValue(int value) {
         return value >= Board.getEmptyValue() && value <= Board.getSize();
+    }
+
+    private static ValidationResult valid(int row, int col) {
+        return new ValidationResult(true, null, row, col, -1, -1);
+    }
+
+    private static ValidationResult invalid(
+            String message,
+            int row,
+            int col,
+            int conflictRow,
+            int conflictCol
+    ) {
+        return new ValidationResult(false, message, row, col, conflictRow, conflictCol);
     }
 }
