@@ -1,12 +1,37 @@
 package com.sudoku.model;
 
 public class Step {
-    int row;
-    int col;
-    int prevValue;
-    int value;
-    StepType type;
+    private int row;
+    private int col;
+    private int prevValue;
+    private int value;
+    private StepType type;
 
-    // Để các thuộc tính Private, viết thêm hàm get/set và các hàm khác nếu cần thiết
+    public Step(int row, int col, int prevValue, int value, StepType type) {
+        this.row = row;
+        this.col = col;
+        this.prevValue = prevValue;
+        this.value = value;
+        this.type = type;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public int getPrevValue() {
+        return prevValue;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public StepType getType() {
+        return type;
+    }
 }
-
