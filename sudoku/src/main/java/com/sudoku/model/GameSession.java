@@ -110,7 +110,8 @@ public class GameSession {
             return false;
         }
 
-        Step lastStep = history.remove(history.size() - 1);
+        int lastIndex = history.size() - 1;
+        Step lastStep = history.get(lastIndex);
         Step undoStep = new Step(
                 lastStep.getRow(),
                 lastStep.getCol(),
@@ -119,7 +120,12 @@ public class GameSession {
                 StepType.UNDO
         );
 
-        return currentBoard.applyStep(undoStep);
+        if (!currentBoard.applyStep(undoStep)) {
+            return false;
+        }
+
+        history.remove(lastIndex);
+        return true;
     }
 
     public boolean isEditableCell(int row, int col) {
