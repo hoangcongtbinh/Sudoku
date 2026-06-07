@@ -1,5 +1,8 @@
 package com.sudoku.solver;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sudoku.model.Board;
 import com.sudoku.model.Step;
 import com.sudoku.model.StepType;
@@ -9,68 +12,63 @@ public class BacktrackingSolver implements Solver {
 
     @Override
     public SolveResult solve(Board board) {
-        SolveResult result = new SolveResult();
 
         if (board == null || !BoardValidator.isValidBoard(board)) {
-            result.setSolved(false);
-            result.setTimeToSolve(0);
-            return result;
+            return SolveResult.noSolution();
         }
 
-        long startTime = System.nanoTime();
+        List<Step> steps = new ArrayList<>();
 
-        boolean solved = solveRecursive(board, result);
+        long start = System.nanoTime();
 
-        long endTime = System.nanoTime();
+        boolean solved = solveRecursive(board, steps);
 
-        result.setSolved(solved);
-        result.setTimeToSolve(endTime - startTime);
+        long end = System.nanoTime();
 
-        return result;
+        return new SolveResult(solved, steps, end - start);
     }
 
-    private boolean solveRecursive(Board board, SolveResult result) {
+    private boolean solveRecursive(Board board, List<Step> steps) {
 
-        int[] emptyCell = findEmptyCell(board);
+        int[] cell = findEmptyCell(board);
 
-        if (emptyCell == null) {
-            return true;
-        }
+        if (cell == null) return true;
 
-        int row = emptyCell[0];
-        int col = emptyCell[1];
+        int row = cell[0];
+        int col = cell[1];
 
-        for (int value = 1; value <= Board.getSize(); value++) {
+        int size = Board.getSize();
+        int empty = Board.getEmptyValue();
 
-            if (BoardValidator.isValidMove(board, row, col, value)) {
+        for (int val = 1; val <= size; val++) {
 
-                board.setCell(row, col, value);
+            if (BoardValidator.isValidMove(board, row, col, val)) {
 
-                result.addStep(
-                        new Step(
-                                row,
-                                col,
-                                Board.getEmptyValue(),
-                                value,
-                                StepType.SOLVER_STEP
-                        )
-                );
+                // TRY
+                board.setCell(row, col, val);
 
-                if (solveRecursive(board, result)) {
+                steps.add(new Step(
+                        row,
+                        col,
+                        empty,
+                        val,
+                        StepType.TRY
+                ));
+
+                if (solveRecursive(board, steps)) {
                     return true;
                 }
 
-                board.setCell(row, col, Board.getEmptyValue());
+                // BACKTRACK
+                board.setCell(row, col, empty);
 
-                result.addStep(
-                        new Step(
-                                row,
-                                col,
-                                value,
-                                Board.getEmptyValue(),
-                                StepType.SOLVER_STEP
-                        )
-                );
+                steps.add(new Step(
+                        row,
+                        col,
+                        val,
+                        empty,
+                        StepType.BACKTRACK
+                ));
             }
         }
 
@@ -79,13 +77,13 @@ public class BacktrackingSolver implements Solver {
 
     private int[] findEmptyCell(Board board) {
 
-        for (int row = 0; row < Board.getSize(); row++) {
-            for (int col = 0; col < Board.getSize(); col++) {
+        int size = Board.getSize();
 
-                if (board.isEmptyCell(row, col)) {
-                    return new int[]{row, col};
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (board.isEmptyCell(r, c)) {
+                    return new int[]{r, c};
                 }
-
             }
         }
 
