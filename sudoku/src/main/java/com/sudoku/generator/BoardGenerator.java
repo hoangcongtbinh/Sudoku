@@ -15,29 +15,26 @@ public class BoardGenerator {
     private final Random random = new Random();
 
     public GameSession generateBoard(Difficulty difficulty) {
-
         if (difficulty == null) {
             difficulty = Difficulty.MEDIUM;
         }
 
         Board solutionBoard = new Board();
-
         fillBoard(solutionBoard);
 
         Board puzzleBoard = solutionBoard.copy();
-
         removeCells(puzzleBoard, difficulty);
 
         return new GameSession(
-                puzzleBoard,
-                solutionBoard,
-                difficulty
+            puzzleBoard,
+            solutionBoard,
+            difficulty
         );
     }
 
     private boolean fillBoard(Board board) {
-
-        int[] emptyCell = findEmptyCell(board);
+        // Dùng hàm từ Board
+        int[] emptyCell = board.findEmptyCell();
 
         if (emptyCell == null) {
             return true;
@@ -47,28 +44,22 @@ public class BoardGenerator {
         int col = emptyCell[1];
 
         List<Integer> candidates = new ArrayList<>();
-
-        for (int value = 1; value <= Board.getSize(); value++) {
+        int size = Board.getSize();
+        for (int value = 1; value <= size; value++) {
             candidates.add(value);
         }
 
         Collections.shuffle(candidates);
 
         for (int value : candidates) {
-
             if (BoardValidator.isValidMove(board, row, col, value)) {
-
                 board.setCell(row, col, value);
 
                 if (fillBoard(board)) {
                     return true;
                 }
 
-                board.setCell(
-                        row,
-                        col,
-                        Board.getEmptyValue()
-                );
+                board.setCell(row, col, Board.getEmptyValue());
             }
         }
 
@@ -76,44 +67,30 @@ public class BoardGenerator {
     }
 
     private void removeCells(Board board, Difficulty difficulty) {
-
         int targetEmptyCells = difficulty.getEmptyCells();
-
         int removedCells = 0;
         int attempts = 0;
+        int size = Board.getSize();
 
         while (removedCells < targetEmptyCells && attempts < 10000) {
-
             attempts++;
 
-            int row = random.nextInt(Board.getSize());
-            int col = random.nextInt(Board.getSize());
+            int row = random.nextInt(size);
+            int col = random.nextInt(size);
 
             if (board.isEmptyCell(row, col)) {
                 continue;
             }
 
             int backupValue = board.getCell(row, col);
-
-            board.setCell(
-                    row,
-                    col,
-                    Board.getEmptyValue()
-            );
+            board.setCell(row, col, Board.getEmptyValue());
 
             int solutionCount = countSolutions(board.copy());
 
             if (solutionCount == 1) {
-
                 removedCells++;
-
             } else {
-
-                board.setCell(
-                        row,
-                        col,
-                        backupValue
-                );
+                board.setCell(row, col, backupValue);
             }
         }
     }
@@ -123,12 +100,11 @@ public class BoardGenerator {
     }
 
     private int countSolutions(Board board, int currentCount) {
-
         if (currentCount > 1) {
             return currentCount;
         }
 
-        int[] emptyCell = findEmptyCell(board);
+        int[] emptyCell = board.findEmptyCell();
 
         if (emptyCell == null) {
             return currentCount + 1;
@@ -136,23 +112,15 @@ public class BoardGenerator {
 
         int row = emptyCell[0];
         int col = emptyCell[1];
+        int size = Board.getSize();
 
-        for (int value = 1; value <= Board.getSize(); value++) {
-
+        for (int value = 1; value <= size; value++) {
             if (BoardValidator.isValidMove(board, row, col, value)) {
-
                 board.setCell(row, col, value);
 
-                currentCount = countSolutions(
-                        board,
-                        currentCount
-                );
+                currentCount = countSolutions(board, currentCount);
 
-                board.setCell(
-                        row,
-                        col,
-                        Board.getEmptyValue()
-                );
+                board.setCell(row, col, Board.getEmptyValue());
 
                 if (currentCount > 1) {
                     return currentCount;
@@ -161,24 +129,5 @@ public class BoardGenerator {
         }
 
         return currentCount;
-    }
-
-    private int[] findEmptyCell(Board board) {
-
-        for (int row = 0; row < Board.getSize(); row++) {
-
-            for (int col = 0; col < Board.getSize(); col++) {
-
-                if (board.isEmptyCell(row, col)) {
-
-                    return new int[] {
-                            row,
-                            col
-                    };
-                }
-            }
-        }
-
-        return null;
     }
 }

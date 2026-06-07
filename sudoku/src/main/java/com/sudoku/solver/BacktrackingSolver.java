@@ -12,13 +12,11 @@ public class BacktrackingSolver implements Solver {
 
     @Override
     public SolveResult solve(Board board) {
-
         if (board == null || !BoardValidator.isValidBoard(board)) {
             return SolveResult.noSolution();
         }
 
         List<Step> steps = new ArrayList<>();
-
         long start = System.nanoTime();
 
         boolean solved = solveRecursive(board, steps);
@@ -29,8 +27,8 @@ public class BacktrackingSolver implements Solver {
     }
 
     private boolean solveRecursive(Board board, List<Step> steps) {
-
-        int[] cell = findEmptyCell(board);
+        // Gọi thẳng từ Board, cực chuẩn OOP
+        int[] cell = board.findEmptyCell();
 
         if (cell == null) return true;
 
@@ -41,19 +39,10 @@ public class BacktrackingSolver implements Solver {
         int empty = Board.getEmptyValue();
 
         for (int val = 1; val <= size; val++) {
-
             if (BoardValidator.isValidMove(board, row, col, val)) {
-
                 // TRY
                 board.setCell(row, col, val);
-
-                steps.add(new Step(
-                        row,
-                        col,
-                        empty,
-                        val,
-                        StepType.TRY
-                ));
+                steps.add(new Step(row, col, empty, val, StepType.TRY));
 
                 if (solveRecursive(board, steps)) {
                     return true;
@@ -61,32 +50,10 @@ public class BacktrackingSolver implements Solver {
 
                 // BACKTRACK
                 board.setCell(row, col, empty);
-
-                steps.add(new Step(
-                        row,
-                        col,
-                        val,
-                        empty,
-                        StepType.BACKTRACK
-                ));
+                steps.add(new Step(row, col, val, empty, StepType.BACKTRACK));
             }
         }
 
         return false;
-    }
-
-    private int[] findEmptyCell(Board board) {
-
-        int size = Board.getSize();
-
-        for (int r = 0; r < size; r++) {
-            for (int c = 0; c < size; c++) {
-                if (board.isEmptyCell(r, c)) {
-                    return new int[]{r, c};
-                }
-            }
-        }
-
-        return null;
     }
 }
