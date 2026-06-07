@@ -1,0 +1,116 @@
+.root {
+    -fx-background-color: #0a0a0f;
+    -fx-font-family: 'Monospaced';
+}
+
+.sudoku-board {
+    -fx-background-color: #00ffcc22;
+    -fx-padding: 10;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 2;
+}
+
+.sudoku-cell {
+    -fx-border-color: #00ffcc55;
+    -fx-border-width: 1;
+    -fx-background-color: #15151a;
+}
+
+.sudoku-cell.given {
+    -fx-text-fill: #00ffcc;
+    -fx-background-color: #15151a;
+}
+
+.sudoku-cell.current {
+    -fx-background-color: #332200;
+    -fx-border-color: #ffb000;
+    -fx-border-width: 3;
+}
+.sudoku-cell.current .label {
+    -fx-text-fill: #ffb000;
+}
+
+.sudoku-cell.trying {
+    -fx-background-color: #003311;
+}
+.sudoku-cell.trying .label {
+    -fx-text-fill: #00ff44;
+}
+
+.sudoku-cell.backtrack {
+    -fx-background-color: #331100;
+}
+.sudoku-cell.backtrack .label {
+    -fx-text-fill: #ff3300;
+}
+
+.sudoku-cell.solved {
+    -fx-background-color: #003311;
+}
+.sudoku-cell.solved .label {
+    -fx-text-fill: #00ff44;
+}
+
+.right-panel {
+    -fx-background-color: #0d0d12;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 0 0 0 1;
+}
+
+.label {
+    -fx-text-fill: #00ffcc;
+    -fx-font-size: 12px;
+}
+
+.cyber-button {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: #00ffcc;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 1;
+    -fx-padding: 8 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.cyber-button:hover {
+    -fx-background-color: #00ffcc;
+    -fx-text-fill: #1a1a2e;
+}
+
+.combo-box {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: #00ffcc;
+    -fx-border-color: #00ffcc;
+}
+
+/* Algorithm selector (ComboBox) styling */
+.algorithm-combo {
+    -fx-background-color: #1a1a2e;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 1;
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 12px;
+    -fx-text-fill: #00ffcc;
+}
+
+.algorithm-combo .arrow-button {
+    -fx-background-color: #1a1a2e;
+}
+
+.algorithm-combo .arrow {
+    -fx-background-color: #00ffcc;
+}
+
+.algorithm-combo .list-cell {
+    -fx-background-color: #0d0d12;
+    -fx-text-fill: #00ffcc;
+}
+
+.algorithm-combo .list-cell:hover {
+    -fx-background-color: #00ffcc;
+    -fx-text-fill: #0d0d12;
+}
+
+.algorithm-combo .list-view {
+    -fx-background-color: #0d0d12;
+    -fx-border-color: #00ffcc;
+}
