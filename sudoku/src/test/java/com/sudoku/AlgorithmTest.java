@@ -111,5 +111,10 @@ public class AlgorithmTest {
         Board alreadySolvedBoard = new Board(solvedMatrix);
         SolveResult solvedResult = solver.solve(alreadySolvedBoard);
         assertTrue(solvedResult.isSolved());
+
+        // 3. Kiểm tra lại với câu đố thông thường (giống 2 thuật toán trên)
+        puzzle = createEasyPuzzle();
+        result = solver.solve(puzzle);
+        assertTrue(result.isSolved());
     }
 }
