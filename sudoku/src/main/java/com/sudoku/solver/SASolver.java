@@ -67,30 +67,39 @@ public class SASolver implements Solver {
         int conflicts = 0;
         int size = Board.getSize();
 
+        // Rows
         for (int row = 0; row < size; row++) {
+
             int[] count = new int[size + 1];
 
             for (int col = 0; col < size; col++) {
                 count[board.getCell(row, col)]++;
             }
 
-            for (int v = 1; v <= size; v++) {
-                if (count[v] > 1) conflicts += count[v] - 1;
+            for (int value = 1; value <= size; value++) {
+                if (count[value] > 1) {
+                    conflicts += count[value] - 1;
+                }
             }
         }
 
+        // Columns
         for (int col = 0; col < size; col++) {
+
             int[] count = new int[size + 1];
 
             for (int row = 0; row < size; row++) {
                 count[board.getCell(row, col)]++;
             }
 
-            for (int v = 1; v <= size; v++) {
-                if (count[v] > 1) conflicts += count[v] - 1;
+            for (int value = 1; value <= size; value++) {
+                if (count[value] > 1) {
+                    conflicts += count[value] - 1;
+                }
             }
         }
 
+        // Boxes
         int boxSize = (int) Math.sqrt(size);
 
         for (int boxRow = 0; boxRow < boxSize; boxRow++) {
@@ -98,14 +107,22 @@ public class SASolver implements Solver {
 
                 int[] count = new int[size + 1];
 
-                for (int r = boxRow * boxSize; r < (boxRow + 1) * boxSize; r++) {
-                    for (int c = boxCol * boxSize; c < (boxCol + 1) * boxSize; c++) {
-                        count[board.getCell(r, c)]++;
+                for (int row = boxRow * boxSize;
+                     row < (boxRow + 1) * boxSize;
+                     row++) {
+
+                    for (int col = boxCol * boxSize;
+                         col < (boxCol + 1) * boxSize;
+                         col++) {
+
+                        count[board.getCell(row, col)]++;
                     }
                 }
 
-                for (int v = 1; v <= size; v++) {
-                    if (count[v] > 1) conflicts += count[v] - 1;
+                for (int value = 1; value <= size; value++) {
+                    if (count[value] > 1) {
+                        conflicts += count[value] - 1;
+                    }
                 }
             }
         }
@@ -117,21 +134,60 @@ public class SASolver implements Solver {
 
         Board neighbor = board.copy();
 
-        int r1, c1, r2, c2;
+        if (random.nextDouble() < 0.5) {
 
-        do {
-            r1 = random.nextInt(Board.getSize());
-            c1 = random.nextInt(Board.getSize());
-        } while (fixed[r1][c1]);
+            int row;
+            int col;
 
-        do {
-            r2 = random.nextInt(Board.getSize());
-            c2 = random.nextInt(Board.getSize());
-        } while (fixed[r2][c2] || (r1 == r2 && c1 == c2));
+            do {
+                row = random.nextInt(Board.getSize());
+                col = random.nextInt(Board.getSize());
+            } while (fixed[row][col]);
 
-        int temp = neighbor.getCell(r1, c1);
-        neighbor.setCell(r1, c1, neighbor.getCell(r2, c2));
-        neighbor.setCell(r2, c2, temp);
+            int oldValue = neighbor.getCell(row, col);
+
+            int newValue;
+
+            do {
+                newValue = random.nextInt(Board.getSize()) + 1;
+            } while (newValue == oldValue);
+
+            neighbor.setCell(row, col, newValue);
+
+        } else {
+
+            int row1;
+            int col1;
+            int row2;
+            int col2;
+
+            do {
+                row1 = random.nextInt(Board.getSize());
+                col1 = random.nextInt(Board.getSize());
+            } while (fixed[row1][col1]);
+
+            do {
+                row2 = random.nextInt(Board.getSize());
+                col2 = random.nextInt(Board.getSize());
+            } while (
+                    fixed[row2][col2]
+                            || (row1 == row2 && col1 == col2)
+            );
+
+            int temp = neighbor.getCell(row1, col1);
+
+            neighbor.setCell(
+                    row1,
+                    col1,
+                    neighbor.getCell(row2, col2)
+            );
+
+            neighbor.setCell(
+                    row2,
+                    col2,
+                    temp
+            );
+        }
 
         return neighbor;
     }
@@ -145,18 +201,28 @@ public class SASolver implements Solver {
 
         steps = new ArrayList<>();
 
-        if (freeCellCount() < 2) {
-            return BoardValidator.isSolved(board) ? SolveResult.alreadySolved() : SolveResult.noSolution();
+        if (freeCellCount() == 0) {
+
+            long endTime = System.currentTimeMillis();
+
+            return new SolveResult(
+                    BoardValidator.isSolved(board),
+                    steps,
+                    endTime - startTime
+            );
         }
 
         Board current = board.copy();
+
         initializeBoard(current);
 
         int currentCost = calculateCost(current);
+
         double temperature = INITIAL_TEMP;
 
         steps.add(new Step(
-                -1, -1,
+                -1,
+                -1,
                 currentCost,
                 currentCost,
                 StepType.SOLVER_STEP
@@ -165,20 +231,29 @@ public class SASolver implements Solver {
         while (temperature > MIN_TEMP && currentCost > 0) {
 
             Board neighbor = generateNeighbor(current);
+
             int neighborCost = calculateCost(neighbor);
 
             int delta = neighborCost - currentCost;
 
             boolean accepted = false;
 
-            if (delta < 0) {
+            if (delta <= 0) {
+
                 current = neighbor;
                 currentCost = neighborCost;
                 accepted = true;
+
             } else {
-                double probability = Math.exp(-((double) delta) / temperature);
+
+                double probability =
+                        Math.exp(
+                                -((double) delta)
+                                        / temperature
+                        );
 
                 if (random.nextDouble() < probability) {
+
                     current = neighbor;
                     currentCost = neighborCost;
                     accepted = true;
@@ -186,8 +261,10 @@ public class SASolver implements Solver {
             }
 
             if (accepted) {
+
                 steps.add(new Step(
-                        -1, -1,
+                        -1,
+                        -1,
                         currentCost,
                         currentCost,
                         StepType.SOLVER_STEP
@@ -199,9 +276,10 @@ public class SASolver implements Solver {
 
         long endTime = System.currentTimeMillis();
 
-        boolean solved = BoardValidator.isSolved(current);
-        long timeToSolve = endTime - startTime;
-
-        return new SolveResult(solved, steps, timeToSolve);
+        return new SolveResult(
+                BoardValidator.isSolved(current),
+                steps,
+                endTime - startTime
+        );
     }
 }
