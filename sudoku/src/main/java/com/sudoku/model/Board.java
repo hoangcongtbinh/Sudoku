@@ -124,4 +124,16 @@ public class Board {
             throw new IllegalArgumentException("Cell value must be from 0 to 9.");
         }
     }
+
+    public int[] findEmptyCell() {
+        int size = Board.getSize(); // Hoặc dùng this.size nếu class có biến này
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (this.isEmptyCell(r, c)) {
+                    return new int[]{r, c};
+                }
+            }
+        }
+        return null;
+    }
 }
