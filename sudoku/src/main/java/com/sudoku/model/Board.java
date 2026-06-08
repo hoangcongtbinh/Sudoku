@@ -136,4 +136,17 @@ public class Board {
         }
         return null;
     }
+
+    public int countEmptyCells() {
+        int count = 0;
+        int size = Board.getSize();
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (this.isEmptyCell(r, c)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
 }
