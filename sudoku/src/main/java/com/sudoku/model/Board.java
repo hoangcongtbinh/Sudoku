@@ -38,16 +38,23 @@ public class Board {
      * Uses BoardGenerator to generate the puzzle.
      */
     public void initBoard(Difficulty difficulty) {
-        int[][] puzzle = BoardGenerator.generate(difficulty); // implement BoardGenerator.generate()
-        if (puzzle != null && isValidMatrix(puzzle)) {
-            this.values = copyMatrix(puzzle);
-            saveOriginal();
+        Board puzzleBoard = BoardGenerator.generatestaticBoard(difficulty); // implement BoardGenerator.generate()
+
+        if (puzzleBoard != null) {
+            int[][] puzzle = puzzleBoard.getGrid();
+            if(isValidMatrix(puzzle)) {
+                this.values = copyMatrix(puzzle);
+                saveOriginal();
+                return;
+            }
         } else {
             // Fallback: empty board
             this.values = new int[SIZE][SIZE];
             this.original = new int[SIZE][SIZE];
         }
     }
+
+
 
     /**
      * Saves the current board state as the original (for reset).

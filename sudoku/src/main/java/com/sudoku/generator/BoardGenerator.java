@@ -12,9 +12,22 @@ import java.util.Random;
 
 public class BoardGenerator {
 
+
     private final Random random = new Random();
 
-    public GameSession generateBoard(Difficulty difficulty) {
+    //tra ve bang static de gen ui
+
+    public static Board generatestaticBoard(Difficulty difficulty) {
+        BoardGenerator generator = new BoardGenerator();
+        GameSession session = generator.generateGameSession(difficulty);
+        Board puzzleBoard = session.getInitBoard();
+        puzzleBoard.saveOriginal();   // store original state for reset functionality
+        return puzzleBoard;
+    }
+
+    // bang dynamic de chay trong game session
+
+    public GameSession generateGameSession(Difficulty difficulty) {
         if (difficulty == null) {
             difficulty = Difficulty.MEDIUM;
         }

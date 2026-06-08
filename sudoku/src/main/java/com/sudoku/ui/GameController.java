@@ -1,5 +1,7 @@
 package com.sudoku.ui;
 
+import com.sudoku.generator.BoardGenerator;
+import com.sudoku.model.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -8,10 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 
-import com.sudoku.model.Board;
-import com.sudoku.model.Difficulty;
-import com.sudoku.model.GameSession;
-import com.sudoku.model.Step;
 import com.sudoku.solver.*;
 
 import java.util.List;
@@ -108,7 +106,7 @@ public class GameController {
     private void newGame() {
         stopAnimation();
         Difficulty diff = Difficulty.valueOf(difficultySelector.getValue().toUpperCase());
-        currentBoard = GameSession.generateNewBoard(diff);  // Implement this in your model
+        currentBoard = BoardGenerator.generatestaticBoard(diff);  // Implement this in your model
         sudokuBoard.setBoard(currentBoard.getGrid());
         refreshSolver();
         resetStats();
