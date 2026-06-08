@@ -1,13 +1,17 @@
 package com.sudoku.model;
 
+import com.sudoku.generator.BoardGenerator;
+
 public class Board {
     private static final int SIZE = 9;
     private static final int EMPTY = 0;
 
     private int[][] values; // Trang thai bang hien tai
+    private int[][] original; // Tranng thai ban dau de reset
 
     public Board() {
         this.values = new int[SIZE][SIZE];
+        this.original = new int[SIZE][SIZE];
     }
 
     public Board(int[][] values) {
@@ -16,7 +20,51 @@ public class Board {
         }
 
         this.values = copyMatrix(values);
+        this.original = copyMatrix(values);
     }
+
+    // bang tai thoi diem choi
+    public int [][] getGrid(){
+        return copyMatrix(values);
+    }
+
+    //bang ban dau
+    public int[][] getOriginalGrid() {
+        return copyMatrix(original);
+    }
+
+    /**
+     * Initializes the board with a puzzle of the given difficulty.
+     * Uses BoardGenerator to generate the puzzle.
+     */
+    public void initBoard(Difficulty difficulty) {
+        int[][] puzzle = BoardGenerator.generate(difficulty); // implement BoardGenerator.generate()
+        if (puzzle != null && isValidMatrix(puzzle)) {
+            this.values = copyMatrix(puzzle);
+            saveOriginal();
+        } else {
+            // Fallback: empty board
+            this.values = new int[SIZE][SIZE];
+            this.original = new int[SIZE][SIZE];
+        }
+    }
+
+    /**
+     * Saves the current board state as the original (for reset).
+     */
+    public void saveOriginal() {
+        this.original = copyMatrix(values);
+    }
+
+    /**
+     * Sets the original board state.
+     */
+    public void setOriginalGrid(int[][] original) {
+        if (isValidMatrix(original)) {
+            this.original = copyMatrix(original);
+        }
+    }
+
 
     public int getCell(int row, int col) {
         validatePosition(row, col);
@@ -124,4 +172,17 @@ public class Board {
             throw new IllegalArgumentException("Cell value must be from 0 to 9.");
         }
     }
+
+    public int[] findEmptyCell() {
+        int size = Board.getSize(); // Hoặc dùng this.size nếu class có biến này
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (this.isEmptyCell(r, c)) {
+                    return new int[]{r, c};
+                }
+            }
+        }
+        return null;
+    }
+    
 }

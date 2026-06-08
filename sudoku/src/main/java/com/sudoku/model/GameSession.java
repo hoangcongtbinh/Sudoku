@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class GameSession {
-    private Board initBoard;
+    public Board initBoard;
     private Board currentBoard;
     private Board solutionBoard;
     private Difficulty difficulty;
@@ -146,4 +146,14 @@ public class GameSession {
         this.endTime = 0;
         this.finished = false;
     }
+
+    // In GameSession.java
+    public static Board initializeNewBoard(Difficulty difficulty) {
+        Board board = new Board();
+        board.initBoard(difficulty);
+        board.saveOriginal();           // we'll add this method next
+        return board;
+    }
+
+
 }
