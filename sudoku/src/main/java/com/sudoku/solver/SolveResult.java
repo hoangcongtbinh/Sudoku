@@ -1,5 +1,4 @@
 package com.sudoku.solver;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +9,14 @@ public class SolveResult {
     private boolean solved;
     private List<Step> steps = new ArrayList<>();
     private long timeToSolve;
+
+    public SolveResult() {}
+
+    public SolveResult(boolean solved, List<Step> steps, long timeToSolve) {
+        this.solved = solved;
+        this.steps = new ArrayList<>(steps);
+        this.timeToSolve = timeToSolve;
+    }
 
     public boolean isSolved() {
         return solved;
