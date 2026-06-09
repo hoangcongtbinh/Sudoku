@@ -284,4 +284,5 @@ public class GameController {
             stepLogArea.setScrollTop(Double.MAX_VALUE);
         });
     }
+    
 }

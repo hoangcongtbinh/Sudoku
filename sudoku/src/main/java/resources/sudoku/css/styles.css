@@ -187,3 +187,102 @@
     -fx-background-color: #0d0d12;
     -fx-border-color: #00ffcc;
 }
+
+/* Algorithm Selector */
+.algorithm-combo {
+    -fx-background-color: #1a1a2e;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 1;
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 12px;
+    -fx-text-fill: #00ffcc;
+}
+
+.algorithm-combo .arrow-button {
+    -fx-background-color: #1a1a2e;
+}
+
+.algorithm-combo .arrow {
+    -fx-background-color: #00ffcc;
+}
+
+.algorithm-combo .list-cell {
+    -fx-background-color: #0d0d12;
+    -fx-text-fill: #00ffcc;
+}
+
+.algorithm-combo .list-cell:hover {
+    -fx-background-color: #00ffcc;
+    -fx-text-fill: #0d0d12;
+}
+
+/* Difficulty Selector */
+.difficulty-combo {
+    -fx-background-color: #1a1a2e;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 1;
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 12px;
+    -fx-text-fill: #00ffcc;
+}
+
+.difficulty-combo .arrow-button {
+    -fx-background-color: #1a1a2e;
+}
+
+.difficulty-combo .arrow {
+    -fx-background-color: #00ffcc;
+}
+
+/* Control Panel */
+.control-panel {
+    -fx-background-color: #0d0d12;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 1 0 0 0;
+}
+
+.control-button {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: #00ffcc;
+    -fx-border-color: #00ffcc;
+    -fx-border-width: 1;
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.control-button:hover {
+    -fx-background-color: #00ffcc;
+    -fx-text-fill: #1a1a2e;
+}
+
+.control-button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+.speed-label {
+    -fx-text-fill: #00ffcc;
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 12px;
+}
+
+.speed-text {
+    -fx-text-fill: #00ffcc;
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 10px;
+}
+
+.speed-slider {
+    -fx-control-inner-background: #1a1a2e;
+}
+
+.speed-slider .track {
+    -fx-background-color: #1a1a2e;
+    -fx-border-color: #00ffcc;
+}
+
+.speed-slider .thumb {
+    -fx-background-color: #00ffcc;
+}
