@@ -34,4 +34,8 @@ public class Step {
     public StepType getType() {
         return type;
     }
+
+    public boolean isBacktrack() {
+        return type == StepType.BACKTRACK || type == StepType.UNDO;
+    }
 }

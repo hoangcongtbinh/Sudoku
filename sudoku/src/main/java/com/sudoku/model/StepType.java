@@ -5,5 +5,8 @@ public enum StepType {
     CLEAR,
     UNDO,
     HINT,
-    SOLVER_STEP
+    SOLVER_STEP,
+    TRY,
+    BACKTRACK,
+    PLACE
 }

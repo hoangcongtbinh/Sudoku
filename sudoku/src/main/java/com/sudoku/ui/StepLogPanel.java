@@ -1,29 +1,39 @@
 package com.sudoku.ui;
 
-import javax.swing.*;
-import java.awt.*;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
 
-public class StepLogPanel extends JPanel {
-    private JTextArea logArea;
-    private JScrollPane scrollPane;
+public class StepLogPanel extends BorderPane {
+    private TextArea logArea;
 
     public StepLogPanel() {
-        setLayout(new BorderLayout());
-        logArea = new JTextArea(10, 30);
+        logArea = new TextArea();
         logArea.setEditable(false);
-        logArea.setBackground(new Color(5, 5, 8));
-        logArea.setForeground(new Color(136, 255, 170));
-        logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        scrollPane = new JScrollPane(logArea);
-        add(scrollPane, BorderLayout.CENTER);
+        logArea.setPrefRowCount(10);
+        logArea.setPrefColumnCount(30);
+
+        // Styling matching the original cyber theme:
+        // Background: #050508, Text: #88ffaa, Font: Monospaced 12px
+        logArea.setStyle(
+            "-fx-control-inner-background: #050508; " +
+            "-fx-text-fill: #88ffaa; " +
+            "-fx-font-family: 'Monospaced'; " +
+            "-fx-font-size: 12px; " +
+            "-fx-highlight-fill: #00ffcc; " +
+            "-fx-highlight-text-fill: #050508;"
+        );
+
+        setCenter(logArea);
     }
 
     public void addLog(String message) {
-        logArea.append("> " + message + "\n");
-        logArea.setCaretPosition(logArea.getDocument().getLength());
+        logArea.appendText("> " + message + "\n");
+        // Scroll to bottom
+        logArea.selectPositionCaret(logArea.getLength());
+        logArea.deselect();
     }
 
     public void clear() {
-        logArea.setText("");
+        logArea.clear();
     }
 }

@@ -7,7 +7,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 
 import com.sudoku.solver.*;
@@ -17,25 +16,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameController {
 
-    // -------- FXML Injected Components (if using FXML) --------
-    @FXML private BorderPane rootPane;
+    // -------- FXML Injected Components --------
     @FXML private SudokuBoard sudokuBoard;           // Custom component
-    @FXML private ComboBox<String> algorithmSelector;
-    @FXML private ComboBox<String> difficultySelector;
+    @FXML private AlgorithmSelector algorithmSelector; // Custom component
+    @FXML private DifficultySelector difficultySelector; // Custom component
+    @FXML private StatsPanel statsPanel;             // Custom component
+    @FXML private StepLogPanel stepLogPanel;         // Custom component
+    @FXML private ControlPanel controlPanel;         // Custom component
     @FXML private Button newGameButton;
-    @FXML private Button stepButton;
-    @FXML private Button playButton;
-    @FXML private Button pauseButton;
-    @FXML private Button resetButton;
-    @FXML private Slider speedSlider;
-    @FXML private Label stepsLabel;
-    @FXML private Label timeLabel;
-    @FXML private Label backtracksLabel;
-    @FXML private Label filledLabel;
-    @FXML private TextArea stepLogArea;
-
-    // -------- Non-FXML Components (if you build UI programmatically) --------
-    // You can also instantiate these manually and add to layout
 
     // -------- Backend State --------
     private Board currentBoard;
@@ -46,52 +34,38 @@ public class GameController {
     private long startTime;
     private AtomicBoolean isPlaying;
     private int backtracks;
-    private long totalSteps;
+    private int totalSteps;
 
     // -------- Initialization --------
-    @FXML
     public void initialize() {
-        // Setup UI components
+        // Animation timer (initially stopped)
+        isPlaying = new AtomicBoolean(false);
+        animationTimeline = new Timeline(new KeyFrame(Duration.millis(300), e -> playNextStep()));
+        animationTimeline.setCycleCount(Timeline.INDEFINITE);
+
+        // Setup UI components initial states
         setupUI();
         // Initialize a new game
         newGame();
         // Setup event handlers
         attachEventHandlers();
-        // Animation timer (initially stopped)
-        isPlaying = new AtomicBoolean(false);
-        animationTimeline = new Timeline(new KeyFrame(Duration.millis(250), e -> playNextStep()));
-        animationTimeline.setCycleCount(Timeline.INDEFINITE);
     }
 
     private void setupUI() {
-        // Algorithm selector items
-        algorithmSelector.getItems().addAll("Backtracking", "MRV", "Simulated Annealing");
-        algorithmSelector.setValue("Backtracking");
-
-        // Difficulty selector items
-        difficultySelector.getItems().addAll("Easy", "Medium", "Hard", "Expert");
-        difficultySelector.setValue("Medium");
-
-        // Speed slider (range 0.1s to 1.0s per step)
-        speedSlider.setMin(0.1);
-        speedSlider.setMax(1.0);
-        speedSlider.setValue(0.3);
-        speedSlider.setShowTickLabels(true);
-        speedSlider.setShowTickMarks(true);
-        speedSlider.setMajorTickUnit(0.3);
-        speedSlider.setBlockIncrement(0.1);
-
-        // Disable pause initially (no animation running)
-        pauseButton.setDisable(true);
+        // Disable pause/stop initially (no animation running)
+        controlPanel.getPauseButton().setDisable(true);
+        controlPanel.getStopButton().setDisable(true);
     }
 
     private void attachEventHandlers() {
         newGameButton.setOnAction(e -> newGame());
-        stepButton.setOnAction(e -> manualStep());
-        playButton.setOnAction(e -> startAnimation());
-        pauseButton.setOnAction(e -> stopAnimation());
-        resetButton.setOnAction(e -> resetToOriginal());
-        speedSlider.valueProperty().addListener((obs, old, val) -> updateAnimationSpeed());
+        
+        controlPanel.getStepButton().setOnAction(e -> manualStep());
+        controlPanel.getPlayButton().setOnAction(e -> startAnimation());
+        controlPanel.getPauseButton().setOnAction(e -> stopAnimation());
+        controlPanel.getResetButton().setOnAction(e -> resetToOriginal());
+        controlPanel.getStopButton().setOnAction(e -> resetToOriginal());
+        controlPanel.getSpeedSlider().valueProperty().addListener((obs, old, val) -> updateAnimationSpeed());
 
         algorithmSelector.valueProperty().addListener((obs, old, val) -> {
             if (currentBoard != null) {
@@ -105,36 +79,41 @@ public class GameController {
     // -------- Game Logic --------
     private void newGame() {
         stopAnimation();
-        Difficulty diff = Difficulty.valueOf(difficultySelector.getValue().toUpperCase());
-        currentBoard = BoardGenerator.generatestaticBoard(diff);  // Implement this in your model
+        Difficulty diff = difficultySelector.getSelectedDifficulty();
+        currentBoard = BoardGenerator.generatestaticBoard(diff);
         sudokuBoard.setBoard(currentBoard.getGrid());
         refreshSolver();
         resetStats();
         clearLog();
-        appendLog("New game started - Difficulty: " + difficultySelector.getValue());
+        appendLog("New game started - Difficulty: " + diff);
     }
 
     private void refreshSolver() {
         String algo = algorithmSelector.getValue();
         if (algo == null) return;
-        switch (algo) {
-            case "Backtracking":
-                currentSolver = new BacktrackingSolver();
-                break;
-            case "MRV":
-                currentSolver = new MRVSolver();
-                break;
-            case "Simulated Annealing":
-                currentSolver = new SASolver();
-                break;
+        
+        if (algo.startsWith("MRV")) {
+            currentSolver = new MRVSolver();
+        } else if (algo.startsWith("Simulated")) {
+            currentSolver = new SASolver();
+        } else {
+            currentSolver = new BacktrackingSolver();
         }
-        // Pre-compute all steps (or compute on the fly).
-        // For simplicity, we compute the whole solution path at once.
-        SolveResult result = currentSolver.solveWithSteps(currentBoard);
+        
+        // Use a copy to prevent solving the main board immediately
+        SolveResult result = currentSolver.solve(currentBoard.copy());
         currentSteps = result.getSteps();
         currentStepIndex = 0;
         totalSteps = currentSteps.size();
-        backtracks = result.getBacktrackCount();
+        
+        // Count total backtracks for the statistics panel
+        backtracks = 0;
+        for (Step s : currentSteps) {
+            if (s.isBacktrack()) {
+                backtracks++;
+            }
+        }
+        
         updateStats();
         appendLog("Algorithm ready: " + algo + " | Total steps estimated: " + totalSteps);
     }
@@ -143,21 +122,23 @@ public class GameController {
         stopAnimation();
         sudokuBoard.setBoard(currentBoard.getOriginalGrid());
         currentStepIndex = 0;
+        startTime = 0;
         updateStats();
+        clearLog();
         appendLog("Reset to original puzzle.");
     }
 
     // -------- Animation Control --------
     private void startAnimation() {
-        if (currentStepIndex >= totalSteps) {
+        if (currentSteps == null || currentStepIndex >= currentSteps.size()) {
             appendLog("Solving already complete. Start a new game.");
             return;
         }
         isPlaying.set(true);
-        playButton.setDisable(true);
-        pauseButton.setDisable(false);
-        stepButton.setDisable(true);
-        startTime = System.currentTimeMillis();
+        controlPanel.setButtonsEnabled(true);
+        if (startTime == 0) {
+            startTime = System.currentTimeMillis();
+        }
         updateAnimationSpeed();
         animationTimeline.play();
         appendLog("▶️ Animation started");
@@ -168,14 +149,13 @@ public class GameController {
             animationTimeline.stop();
         }
         isPlaying.set(false);
-        playButton.setDisable(false);
-        pauseButton.setDisable(true);
-        stepButton.setDisable(false);
+        controlPanel.setButtonsEnabled(false);
         appendLog("⏸️ Animation paused");
     }
 
     private void updateAnimationSpeed() {
-        double speed = speedSlider.getValue();
+        double speed = controlPanel.getSpeedSlider().getValue();
+        // Convert slider value to seconds (e.g. 0.1s to 1.0s)
         Duration duration = Duration.seconds(speed);
         animationTimeline.getKeyFrames().clear();
         animationTimeline.getKeyFrames().add(new KeyFrame(duration, e -> playNextStep()));
@@ -183,39 +163,37 @@ public class GameController {
 
     private void playNextStep() {
         if (!isPlaying.get()) return;
-        if (currentStepIndex >= totalSteps) {
-            // Finished
+        if (currentSteps == null || currentStepIndex >= currentSteps.size()) {
             stopAnimation();
-            appendLog("✅ Solved! Total steps: " + totalSteps);
+            appendLog("✅ Solved! Total steps: " + currentStepIndex);
             return;
         }
         Step step = currentSteps.get(currentStepIndex);
-        // Apply step to board
         applyStep(step);
         currentStepIndex++;
-        // Update stats
-        totalSteps++;
         updateStats();
-        // Log step
-        appendLog(step.toString());
-        // Check completion
-        if (currentStepIndex >= totalSteps) {
+        appendLog(formatStep(step));
+        
+        if (currentStepIndex >= currentSteps.size()) {
             stopAnimation();
             appendLog("🎉 Solving completed.");
         }
     }
 
     private void manualStep() {
-        if (currentStepIndex >= totalSteps) {
+        if (currentSteps == null || currentStepIndex >= currentSteps.size()) {
             appendLog("No more steps. New game?");
             return;
+        }
+        if (startTime == 0) {
+            startTime = System.currentTimeMillis();
         }
         Step step = currentSteps.get(currentStepIndex);
         applyStep(step);
         currentStepIndex++;
         updateStats();
-        appendLog(step.toString());
-        if (currentStepIndex >= totalSteps) {
+        appendLog(formatStep(step));
+        if (currentStepIndex >= currentSteps.size()) {
             appendLog("🎉 Final step reached.");
         }
     }
@@ -223,13 +201,14 @@ public class GameController {
     private void applyStep(Step step) {
         int row = step.getRow();
         int col = step.getCol();
+        if (row == -1 || col == -1) {
+            // For solvers that do not update single cells (e.g. SA)
+            return;
+        }
         int value = step.getValue();
         CellState state = mapStepTypeToCellState(step.getType());
         sudokuBoard.updateCell(row, col, value, state);
-        if (step.isBacktrack()) {
-            backtracks++;
-            updateStats();
-        }
+        
         // Highlight current cell
         sudokuBoard.highlightCell(row, col);
     }
@@ -239,26 +218,68 @@ public class GameController {
             case TRY: return CellState.TRYING;
             case BACKTRACK: return CellState.BACKTRACK;
             case PLACE: return CellState.SOLVED;
+            case SOLVER_STEP: return CellState.SOLVED;
+            case UNDO: return CellState.BACKTRACK;
             default: return CellState.EMPTY;
         }
     }
 
+    private String formatStep(Step step) {
+        if (step.getRow() == -1) {
+            return "Cost/Conflicts: " + step.getValue();
+        }
+        String typeStr = step.getType().toString();
+        switch (step.getType()) {
+            case TRY:
+                typeStr = "Try";
+                break;
+            case BACKTRACK:
+                typeStr = "Backtrack";
+                break;
+            case PLACE:
+                typeStr = "Place";
+                break;
+            case SOLVER_STEP:
+                typeStr = "Solve Step";
+                break;
+            case UNDO:
+                typeStr = "Undo";
+                break;
+        }
+        return String.format("%s at (%d, %d) to %d", 
+            typeStr, 
+            step.getRow() + 1, 
+            step.getCol() + 1, 
+            step.getValue());
+    }
+
     // -------- Statistics UI Update --------
     private void resetStats() {
-        totalSteps = 0;
-        backtracks = 0;
         currentStepIndex = 0;
-        updateStats();
+        startTime = 0;
+        statsPanel.reset();
     }
 
     private void updateStats() {
         Platform.runLater(() -> {
-            stepsLabel.setText("Steps: " + totalSteps);
-            backtracksLabel.setText("Backtracks: " + backtracks);
+            statsPanel.updateSteps(currentStepIndex);
+            
+            // Count backtracks up to currentStepIndex
+            int backtracksPlayed = 0;
+            if (currentSteps != null) {
+                for (int i = 0; i < currentStepIndex && i < currentSteps.size(); i++) {
+                    if (currentSteps.get(i).isBacktrack()) {
+                        backtracksPlayed++;
+                    }
+                }
+            }
+            statsPanel.updateBacktracks(backtracksPlayed);
+            
             int filled = countFilledCells();
-            filledLabel.setText("Filled: " + filled + "/81");
+            statsPanel.updateFilled(filled);
+            
             long elapsed = (startTime > 0 ? System.currentTimeMillis() - startTime : 0);
-            timeLabel.setText(String.format("Time: %.2f s", elapsed / 1000.0));
+            statsPanel.updateTime(elapsed / 1000.0);
         });
     }
 
@@ -275,14 +296,12 @@ public class GameController {
 
     // -------- Logging --------
     private void clearLog() {
-        stepLogArea.clear();
+        stepLogPanel.clear();
     }
 
     private void appendLog(String msg) {
         Platform.runLater(() -> {
-            stepLogArea.appendText("> " + msg + "\n");
-            stepLogArea.setScrollTop(Double.MAX_VALUE);
+            stepLogPanel.addLog(msg);
         });
     }
-    
 }

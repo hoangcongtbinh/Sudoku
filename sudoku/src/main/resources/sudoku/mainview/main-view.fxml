@@ -2,6 +2,12 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import com.sudoku.ui.SudokuBoard?>
+<?import com.sudoku.ui.AlgorithmSelector?>
+<?import com.sudoku.ui.DifficultySelector?>
+<?import com.sudoku.ui.StatsPanel?>
+<?import com.sudoku.ui.StepLogPanel?>
+<?import com.sudoku.ui.ControlPanel?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -10,28 +16,28 @@
 
     <!-- Center: Bảng Sudoku (sẽ được điều khiển bằng code) -->
     <center>
-        <fx:include fx:id="sudokuBoard" source="sudoku-board.fxml"/>
+        <SudokuBoard fx:id="sudokuBoard"/>
     </center>
 
     <!-- Right: Các panel điều khiển -->
     <right>
-        <VBox spacing="10" styleClass="right-panel">
+        <VBox spacing="10" styleClass="right-panel" alignment="TOP_CENTER" prefWidth="250">
             <HBox spacing="5" alignment="CENTER">
                 <Label text="Algorithm:" styleClass="label"/>
-                <fx:include fx:id="algorithmSelector" source="algorithm-selector.fxml"/>
+                <AlgorithmSelector fx:id="algorithmSelector"/>
             </HBox>
             <HBox spacing="5" alignment="CENTER">
                 <Label text="Difficulty:" styleClass="label"/>
-                <fx:include fx:id="difficultySelector" source="difficulty-selector.fxml"/>
+                <DifficultySelector fx:id="difficultySelector"/>
             </HBox>
             <Button text="NEW GAME" fx:id="newGameButton" styleClass="cyber-button"/>
-            <fx:include fx:id="statsPanel" source="stats-panel.fxml"/>
-            <fx:include fx:id="stepLogPanel" source="step-log-panel.fxml"/>
+            <StatsPanel fx:id="statsPanel"/>
+            <StepLogPanel fx:id="stepLogPanel"/>
         </VBox>
     </right>
 
     <!-- Bottom: Control panel -->
     <bottom>
-        <fx:include fx:id="controlPanel" source="control-panel.fxml"/>
+        <ControlPanel fx:id="controlPanel"/>
     </bottom>
 </BorderPane>
