@@ -12,10 +12,10 @@ public class GeneratorTest {
         // Tạo bảng với 4 độ khó khác nhau
         BoardGenerator boardGenerator = new BoardGenerator();
 
-        GameSession gameEasy = boardGenerator.generateBoard(Difficulty.EASY);
-        GameSession gameMedium = boardGenerator.generateBoard(Difficulty.MEDIUM);
-        GameSession gameHard = boardGenerator.generateBoard(Difficulty.HARD);
-        GameSession gameExpert = boardGenerator.generateBoard(Difficulty.EXPERT);
+        GameSession gameEasy = boardGenerator.generateGameSession(Difficulty.EASY);
+        GameSession gameMedium = boardGenerator.generateGameSession(Difficulty.MEDIUM);
+        GameSession gameHard = boardGenerator.generateGameSession(Difficulty.HARD);
+        GameSession gameExpert = boardGenerator.generateGameSession(Difficulty.EXPERT);
 
         // Kiểm tra bảng là câu đố thật sự
         assertFalse(gameEasy.getCurrentBoard().isFull());

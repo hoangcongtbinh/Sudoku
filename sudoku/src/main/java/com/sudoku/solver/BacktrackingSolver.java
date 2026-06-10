@@ -49,7 +49,7 @@ public class BacktrackingSolver implements Solver {
 
                 // BACKTRACK
                 board.setCell(row, col, empty);
-                steps.add(new Step(row, col, val, empty, StepType.SOLVER_BACKTRACK));
+                steps.add(new Step(row, col, val, empty, StepType.BACKTRACK));
             }
         }
 
