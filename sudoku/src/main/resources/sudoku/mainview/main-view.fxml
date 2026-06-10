@@ -1,43 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import com.sudoku.ui.SudokuBoard?>
 <?import com.sudoku.ui.AlgorithmSelector?>
+<?import com.sudoku.ui.ControlPanel?>
 <?import com.sudoku.ui.DifficultySelector?>
 <?import com.sudoku.ui.StatsPanel?>
 <?import com.sudoku.ui.StepLogPanel?>
-<?import com.sudoku.ui.ControlPanel?>
+<?import com.sudoku.ui.SudokuBoard?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.sudoku.ui.GameController"
             stylesheets="@../css/styles.css">
 
-    <!-- Center: Bảng Sudoku (sẽ được điều khiển bằng code) -->
+    <!-- ══ TOP: Title bar ═══════════════════════════════════════════════ -->
+    <top>
+        <HBox styleClass="title-bar" alignment="CENTER_LEFT" spacing="8">
+            <Label text="SUDOKU" styleClass="title-main"/>
+            <Label text="·" styleClass="title-sep"/>
+            <Label text="SOLVER" styleClass="title-sub"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="ALGORITHM VISUALIZER" styleClass="title-badge"/>
+        </HBox>
+    </top>
+
+    <!-- ══ CENTER: Sudoku board ══════════════════════════════════════════ -->
     <center>
-        <SudokuBoard fx:id="sudokuBoard"/>
+        <StackPane styleClass="board-wrapper">
+            <SudokuBoard fx:id="sudokuBoard"/>
+        </StackPane>
     </center>
 
-    <!-- Right: Các panel điều khiển -->
+    <!-- ══ RIGHT: Control panel ══════════════════════════════════════════ -->
     <right>
-        <VBox spacing="10" styleClass="right-panel" alignment="TOP_CENTER" prefWidth="250">
-            <HBox spacing="5" alignment="CENTER">
-                <Label text="Algorithm:" styleClass="label"/>
-                <AlgorithmSelector fx:id="algorithmSelector"/>
-            </HBox>
-            <HBox spacing="5" alignment="CENTER">
-                <Label text="Difficulty:" styleClass="label"/>
-                <DifficultySelector fx:id="difficultySelector"/>
-            </HBox>
-            <Button text="NEW GAME" fx:id="newGameButton" styleClass="cyber-button"/>
-            <StatsPanel fx:id="statsPanel"/>
-            <StepLogPanel fx:id="stepLogPanel"/>
+        <VBox spacing="12"
+              styleClass="right-panel"
+              alignment="TOP_CENTER"
+              prefWidth="250">
+
+            <!-- Algorithm selector -->
+            <VBox spacing="5" styleClass="control-section">
+                <Label text="ALGORITHM" styleClass="section-label"/>
+                <AlgorithmSelector fx:id="algorithmSelector"
+                                   styleClass="cyber-select"
+                                   maxWidth="1.7976931348623157E308"/>
+            </VBox>
+
+            <!-- Difficulty selector -->
+            <VBox spacing="5" styleClass="control-section">
+                <Label text="DIFFICULTY" styleClass="section-label"/>
+                <DifficultySelector fx:id="difficultySelector"
+                                    styleClass="cyber-select"
+                                    maxWidth="1.7976931348623157E308"/>
+            </VBox>
+
+            <Separator styleClass="neon-divider"/>
+
+            <!-- New Game -->
+            <Button text="NEW GAME"
+                    fx:id="newGameButton"
+                    styleClass="cyber-button"
+                    maxWidth="1.7976931348623157E308"/>
+
+            <Separator styleClass="neon-divider"/>
+
+            <!-- Stats -->
+            <StatsPanel fx:id="statsPanel"
+                        styleClass="stats-panel"
+                        maxWidth="1.7976931348623157E308"/>
+
+            <Separator styleClass="neon-divider"/>
+
+            <!-- Step log — grows to fill remaining space -->
+            <StepLogPanel fx:id="stepLogPanel"
+                          styleClass="step-log-panel"
+                          maxWidth="1.7976931348623157E308"
+                          VBox.vgrow="ALWAYS"/>
+
         </VBox>
     </right>
 
-    <!-- Bottom: Control panel -->
+    <!-- ══ BOTTOM: Playback controls ═════════════════════════════════════ -->
     <bottom>
-        <ControlPanel fx:id="controlPanel"/>
+        <ControlPanel fx:id="controlPanel" styleClass="control-bar"/>
     </bottom>
+
 </BorderPane>

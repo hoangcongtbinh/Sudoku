@@ -1,288 +1,667 @@
+/* ================================================================
+   SUDOKU SOLVER  ·  NEON TERMINAL  v1.0
+   JavaFX Stylesheet  ·  Retro-Cyberpunk Algorithm Visualizer
+
+   Palette:
+     #080a0f  — void (root background)
+     #0d1117  — surface (panels)
+     #0b1525  — deep (cells, inputs)
+     #1a2535  — border-dim
+     #1e3050  — border-mid
+     #00d4ff  — cyan    primary accent / UI chrome
+     #00ff88  — green   solved / correct placement
+     #ffaa00  — amber   algorithm is trying this cell
+     #ff3355  — red     backtrack / error
+     #4488ff  — blue    given / original cells
+     #d0e8f8  — text-bright
+     #6080a0  — text-muted
+   ================================================================ */
+
+
+/* ── ROOT ───────────────────────────────────────────────────────────────── */
 .root {
-    -fx-background-color: #0a0a0f;
-    -fx-font-family: 'Monospaced';
+    -fx-background-color: #080a0f;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 13px;
 }
 
+
+/* ── TITLE BAR ──────────────────────────────────────────────────────────── */
+.title-bar {
+    -fx-background-color: #080a0f;
+    -fx-padding: 14 22 12 22;
+    -fx-border-color: transparent transparent #1a2535 transparent;
+    -fx-border-width: 1;
+    -fx-spacing: 8;
+}
+
+.title-main {
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 18, 0.55, 0, 0);
+}
+
+.title-sep {
+    -fx-text-fill: #1e3050;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 20px;
+    -fx-padding: 0 4 0 4;
+}
+
+.title-sub {
+    -fx-text-fill: #4a6480;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.title-badge {
+    -fx-text-fill: #4a6480;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 9px;
+    -fx-background-color: #0d1117;
+    -fx-border-color: #1a2535;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-padding: 4 10 4 10;
+}
+
+
+/* ── BOARD WRAPPER ──────────────────────────────────────────────────────── */
+.board-wrapper {
+    -fx-background-color: #080a0f;
+    -fx-padding: 28;
+    -fx-alignment: CENTER;
+}
+
+/* GridPane of cells — outer frame glow */
 .sudoku-board {
-    -fx-background-color: #00ffcc22;
-    -fx-padding: 10;
-    -fx-border-color: #00ffcc;
+    -fx-background-color: #060810;
+    -fx-border-color: #1e3050;
     -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, #001a2a, 40, 0.6, 0, 0);
 }
 
+
+/* ── SUDOKU CELL — BASE ─────────────────────────────────────────────────── */
 .sudoku-cell {
-    -fx-border-color: #00ffcc55;
-    -fx-border-width: 1;
-    -fx-background-color: #15151a;
-}
-
-.sudoku-cell.given {
-    -fx-text-fill: #00ffcc;
-    -fx-background-color: #15151a;
-}
-
-.sudoku-cell.current {
-    -fx-background-color: #332200;
-    -fx-border-color: #ffb000;
-    -fx-border-width: 3;
-}
-.sudoku-cell.current .label {
-    -fx-text-fill: #ffb000;
-}
-
-.sudoku-cell.trying {
-    -fx-background-color: #003311;
-}
-.sudoku-cell.trying .label {
-    -fx-text-fill: #00ff44;
-}
-
-.sudoku-cell.backtrack {
-    -fx-background-color: #331100;
-}
-.sudoku-cell.backtrack .label {
-    -fx-text-fill: #ff3300;
-}
-
-.sudoku-cell.solved {
-    -fx-background-color: #003311;
-}
-.sudoku-cell.solved .label {
-    -fx-text-fill: #00ff44;
-}
-
-.right-panel {
-    -fx-background-color: #0d0d12;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 0 0 0 1;
-}
-
-.label {
-    -fx-text-fill: #00ffcc;
-    -fx-font-size: 12px;
-}
-
-.cyber-button {
-    -fx-background-color: #1a1a2e;
-    -fx-text-fill: #00ffcc;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1;
-    -fx-padding: 8 20;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-.cyber-button:hover {
-    -fx-background-color: #00ffcc;
-    -fx-text-fill: #1a1a2e;
-}
-
-.combo-box {
-    -fx-background-color: #1a1a2e;
-    -fx-text-fill: #00ffcc;
-    -fx-border-color: #00ffcc;
-}
-
-/* Algorithm selector (ComboBox) styling */
-.algorithm-combo {
-    -fx-background-color: #1a1a2e;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1;
-    -fx-font-family: 'Monospaced';
-    -fx-font-size: 12px;
-    -fx-text-fill: #00ffcc;
-}
-
-.algorithm-combo .arrow-button {
-    -fx-background-color: #1a1a2e;
-}
-
-.algorithm-combo .arrow {
-    -fx-background-color: #00ffcc;
-}
-
-.algorithm-combo .list-cell {
-    -fx-background-color: #0d0d12;
-    -fx-text-fill: #00ffcc;
-}
-
-.algorithm-combo .list-cell:hover {
-    -fx-background-color: #00ffcc;
-    -fx-text-fill: #0d0d12;
-}
-
-.algorithm-combo .list-view {
-    -fx-background-color: #0d0d12;
-    -fx-border-color: #00ffcc;
-}
-
-.sudoku-cell {
-    -fx-background-color: #15151a;
-    -fx-border-color: #00ffcc55;
-    -fx-border-width: 1;
-}
-.sudoku-cell.given .label { -fx-text-fill: #00ffcc; }
-.sudoku-cell.empty .label { -fx-text-fill: #666; }
-.sudoku-cell.current { -fx-background-color: #332200; -fx-border-color: #ffb000; -fx-border-width: 2; }
-.sudoku-cell.current .label { -fx-text-fill: #ffb000; }
-.sudoku-cell.trying { -fx-background-color: #003311; }
-.sudoku-cell.trying .label { -fx-text-fill: #00ff44; }
-.sudoku-cell.backtrack { -fx-background-color: #331100; }
-.sudoku-cell.backtrack .label { -fx-text-fill: #ff3300; }
-.sudoku-cell.solved { -fx-background-color: #003311; }
-.sudoku-cell.solved .label { -fx-text-fill: #00ff44; }
-.sudoku-cell.highlighted { -fx-background-color: #2a2a3e; }
-
-
-.stats-panel {
-    -fx-background-color: #0d0d12;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 0 0 0 1;
-}
-
-.stats-title {
-    -fx-text-fill: #00ffcc;
-    -fx-font-weight: bold;
-}
-
-.stat-label {
-    -fx-text-fill: #00ffcc;
-    -fx-font-family: 'Monospaced';
-}
-
-.filled-progress {
-    -fx-accent: #00ffcc;
-    -fx-background-color: #1a1a2e;
-    -fx-border-color: #00ffcc;
-}
-
-
-.algorithm-combo {
-    -fx-background-color: #1a1a2e;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1;
-    -fx-font-family: 'Monospaced';
-    -fx-font-size: 12px;
-    -fx-text-fill: #00ffcc;
-}
-
-.algorithm-combo .arrow-button {
-    -fx-background-color: #1a1a2e;
-}
-
-.algorithm-combo .arrow {
-    -fx-background-color: #00ffcc;
-}
-
-.algorithm-combo .list-cell {
-    -fx-background-color: #0d0d12;
-    -fx-text-fill: #00ffcc;
-}
-
-.algorithm-combo .list-cell:hover {
-    -fx-background-color: #00ffcc;
-    -fx-text-fill: #0d0d12;
-}
-
-.algorithm-combo .list-view {
-    -fx-background-color: #0d0d12;
-    -fx-border-color: #00ffcc;
-}
-
-/* Algorithm Selector */
-.algorithm-combo {
-    -fx-background-color: #1a1a2e;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1;
-    -fx-font-family: 'Monospaced';
-    -fx-font-size: 12px;
-    -fx-text-fill: #00ffcc;
-}
-
-.algorithm-combo .arrow-button {
-    -fx-background-color: #1a1a2e;
-}
-
-.algorithm-combo .arrow {
-    -fx-background-color: #00ffcc;
-}
-
-.algorithm-combo .list-cell {
-    -fx-background-color: #0d0d12;
-    -fx-text-fill: #00ffcc;
-}
-
-.algorithm-combo .list-cell:hover {
-    -fx-background-color: #00ffcc;
-    -fx-text-fill: #0d0d12;
-}
-
-/* Difficulty Selector */
-.difficulty-combo {
-    -fx-background-color: #1a1a2e;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1;
-    -fx-font-family: 'Monospaced';
-    -fx-font-size: 12px;
-    -fx-text-fill: #00ffcc;
-}
-
-.difficulty-combo .arrow-button {
-    -fx-background-color: #1a1a2e;
-}
-
-.difficulty-combo .arrow {
-    -fx-background-color: #00ffcc;
-}
-
-/* Control Panel */
-.control-panel {
-    -fx-background-color: #0d0d12;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1 0 0 0;
-}
-
-.control-button {
-    -fx-background-color: #1a1a2e;
-    -fx-text-fill: #00ffcc;
-    -fx-border-color: #00ffcc;
-    -fx-border-width: 1;
-    -fx-font-family: 'Monospaced';
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
+    -fx-background-color: #0b1525;
+    -fx-border-color: #1a2535;
+    -fx-border-width: 0.5;
+    -fx-alignment: CENTER;
+    -fx-min-width: 54px;
+    -fx-min-height: 54px;
+    -fx-max-width: 54px;
+    -fx-max-height: 54px;
     -fx-cursor: hand;
 }
 
-.control-button:hover {
-    -fx-background-color: #00ffcc;
-    -fx-text-fill: #1a1a2e;
+.sudoku-cell .label {
+    -fx-text-fill: #3a5070;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
 }
 
-.control-button:disabled {
-    -fx-opacity: 0.5;
-    -fx-cursor: default;
+/* 3×3 block boundary lines */
+.cell-block-right {
+    -fx-border-color: #1a2535 #1e4268 #1a2535 #1a2535;
+    -fx-border-width: 0.5 2.5 0.5 0.5;
 }
 
-.speed-label {
-    -fx-text-fill: #00ffcc;
-    -fx-font-family: 'Monospaced';
+.cell-block-bottom {
+    -fx-border-color: #1a2535 #1a2535 #1e4268 #1a2535;
+    -fx-border-width: 0.5 0.5 2.5 0.5;
+}
+
+.cell-block-right.cell-block-bottom {
+    -fx-border-color: #1a2535 #1e4268 #1e4268 #1a2535;
+    -fx-border-width: 0.5 2.5 2.5 0.5;
+}
+
+
+/* ── SUDOKU CELL — ALGORITHM STATES ─────────────────────────────────────── */
+
+/* Given / Original — cannot be changed */
+.cell-given {
+    -fx-background-color: #0a1830;
+}
+.cell-given .label {
+    -fx-text-fill: #4488ff;
+    -fx-effect: dropshadow(gaussian, #4488ff, 9, 0.4, 0, 0);
+}
+
+/* User-selected cell */
+.cell-selected {
+    -fx-background-color: #0d1e38;
+    -fx-border-color: #00d4ff;
+    -fx-border-width: 1.5;
+}
+.cell-selected .label {
+    -fx-text-fill: #00d4ff;
+}
+
+/* Algorithm is currently evaluating this cell — amber pulse */
+.cell-solving {
+    -fx-background-color: #181000;
+    -fx-border-color: #ffaa00;
+    -fx-border-width: 1;
+}
+.cell-solving .label {
+    -fx-text-fill: #ffaa00;
+    -fx-effect: dropshadow(gaussian, #ffaa00, 16, 0.65, 0, 0);
+}
+
+/* Algorithm is backtracking through this cell — red flash */
+.cell-backtrack {
+    -fx-background-color: #180508;
+    -fx-border-color: #ff3355;
+    -fx-border-width: 1;
+}
+.cell-backtrack .label {
+    -fx-text-fill: #ff3355;
+    -fx-effect: dropshadow(gaussian, #ff3355, 16, 0.65, 0, 0);
+}
+
+/* Cell has been confirmed correct — green lock */
+.cell-solved {
+    -fx-background-color: #041810;
+}
+.cell-solved .label {
+    -fx-text-fill: #00ff88;
+    -fx-effect: dropshadow(gaussian, #00ff88, 12, 0.5, 0, 0);
+}
+
+/* Number conflict — dim red warning */
+.cell-error {
+    -fx-background-color: #160407;
+}
+.cell-error .label {
+    -fx-text-fill: #cc2244;
+    -fx-effect: dropshadow(gaussian, #cc2244, 10, 0.4, 0, 0);
+}
+
+/* Candidate highlight (shown during hint/MRV display) */
+.cell-candidate {
+    -fx-background-color: #0c1820;
+    -fx-border-color: #1e3a60;
+    -fx-border-width: 1;
+}
+.cell-candidate .label {
+    -fx-text-fill: #6090b8;
+}
+
+
+/* ── RIGHT CONTROL PANEL ────────────────────────────────────────────────── */
+.right-panel {
+    -fx-background-color: #0d1117;
+    -fx-border-color: transparent transparent transparent #1a2535;
+    -fx-border-width: 1;
+    -fx-padding: 20 14 20 14;
+    -fx-spacing: 12;
+}
+
+/* Grouped section inside the panel */
+.control-section {
+    -fx-background-color: transparent;
+    -fx-spacing: 5;
+}
+
+/* Small uppercase label above a selector */
+.section-label {
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+
+/* ── COMBO BOX (Algorithm / Difficulty selectors) ────────────────────────── */
+
+/* Applied as styleClass="cyber-select" on AlgorithmSelector / DifficultySelector */
+.cyber-select,
+.combo-box.cyber-select {
+    -fx-background-color: #0b1525;
+    -fx-border-color: #1e3050;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-font-family: "Consolas", monospace;
     -fx-font-size: 12px;
 }
 
-.speed-text {
-    -fx-text-fill: #00ffcc;
-    -fx-font-family: 'Monospaced';
+.cyber-select .list-cell,
+.combo-box.cyber-select .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d0e8f8;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-padding: 5 8 5 8;
+}
+
+.cyber-select:focused,
+.combo-box.cyber-select:focused {
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.25, 0, 0);
+}
+
+.cyber-select:hover,
+.combo-box.cyber-select:hover {
+    -fx-border-color: #255580;
+}
+
+.cyber-select .arrow-button,
+.combo-box.cyber-select .arrow-button {
+    -fx-background-color: #0b1525;
+    -fx-border-color: transparent transparent transparent #1e3050;
+    -fx-border-width: 1;
+    -fx-padding: 0 6 0 6;
+}
+
+.cyber-select .arrow,
+.combo-box.cyber-select .arrow {
+    -fx-background-color: #00d4ff;
+}
+
+/* Popup list */
+.combo-box-popup .list-view {
+    -fx-background-color: #0a1622;
+    -fx-border-color: #00d4ff;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, #001828, 20, 0.5, 0, 6);
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6080a0;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-padding: 7 14 7 14;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #0f2035;
+    -fx-text-fill: #00d4ff;
+}
+
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #0a1828;
+    -fx-text-fill: #00d4ff;
+}
+
+
+/* ── SEPARATOR ──────────────────────────────────────────────────────────── */
+.neon-divider {
+    -fx-padding: 2 0 2 0;
+}
+
+.neon-divider > .line {
+    -fx-border-color: #1a2535;
+    -fx-border-width: 0.5 0 0 0;
+    -fx-background-color: transparent;
+}
+
+
+/* ── CYBER BUTTON — Default ─────────────────────────────────────────────── */
+.cyber-button {
+    -fx-background-color: #08111e;
+    -fx-border-color: #1e3a60;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+}
+
+.cyber-button:hover {
+    -fx-background-color: #0a1e32;
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 12, 0.3, 0, 0);
+}
+
+.cyber-button:pressed {
+    -fx-background-color: #0d2540;
+    -fx-border-color: #0090b8;
+    -fx-text-fill: #0090b8;
+    -fx-effect: dropshadow(gaussian, #0090b8, 8, 0.35, 0, 0);
+}
+
+.cyber-button:focused {
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.25, 0, 0);
+}
+
+/* Solve/primary action — slightly hotter glow by default */
+.cyber-button-primary {
+    -fx-background-color: #08111e;
+    -fx-border-color: #00d4ff;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.25, 0, 0);
+}
+
+.cyber-button-primary:hover {
+    -fx-background-color: #0a2840;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 20, 0.45, 0, 0);
+}
+
+.cyber-button-primary:pressed {
+    -fx-background-color: #0d2e48;
+    -fx-text-fill: #0090b8;
+    -fx-border-color: #0090b8;
+}
+
+/* Danger / Reset */
+.cyber-button-danger {
+    -fx-background-color: #120508;
+    -fx-border-color: #551525;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-text-fill: #ff3355;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+}
+
+.cyber-button-danger:hover {
+    -fx-border-color: #ff3355;
+    -fx-effect: dropshadow(gaussian, #ff3355, 12, 0.3, 0, 0);
+}
+
+.cyber-button-danger:pressed {
+    -fx-background-color: #1c060c;
+    -fx-border-color: #cc2244;
+    -fx-text-fill: #cc2244;
+}
+
+
+/* ── STATS PANEL ────────────────────────────────────────────────────────── */
+.stats-panel {
+    -fx-background-color: #090d14;
+    -fx-border-color: #1a2535;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 10 12 10 12;
+    -fx-spacing: 6;
+}
+
+/* Key-value row */
+.stats-row {
+    -fx-padding: 1 0 1 0;
+    -fx-spacing: 6;
+}
+
+.stats-key {
+    -fx-text-fill: #4a6480;
+    -fx-font-family: "Consolas", monospace;
     -fx-font-size: 10px;
 }
 
-.speed-slider {
-    -fx-control-inner-background: #1a1a2e;
+/* Green value — steps placed, cells solved */
+.stats-value {
+    -fx-text-fill: #00ff88;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, #00ff88, 6, 0.3, 0, 0);
 }
 
+/* Amber value — timer, speed */
+.stats-value-amber {
+    -fx-text-fill: #ffaa00;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Red value — backtracks */
+.stats-value-red {
+    -fx-text-fill: #ff3355;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Neutral / dim value */
+.stats-value-dim {
+    -fx-text-fill: #6080a0;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+
+/* ── STEP LOG PANEL ─────────────────────────────────────────────────────── */
+.step-log-panel {
+    -fx-background-color: #090d14;
+    -fx-border-color: #1a2535;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 10 10 10 10;
+    -fx-spacing: 4;
+}
+
+.step-log-header {
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+}
+
+/* ListView inside StepLogPanel */
+.step-log-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.step-log-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3a5570;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 10px;
+    -fx-padding: 1 4 1 4;
+}
+
+.step-log-list .list-cell:odd {
+    -fx-background-color: #0a0e18;
+}
+
+/* Per-entry type classes (apply to Label cells) */
+.log-entry-try {
+    -fx-text-fill: #cc8800;
+}
+
+.log-entry-backtrack {
+    -fx-text-fill: #cc2244;
+}
+
+.log-entry-solved {
+    -fx-text-fill: #00cc66;
+    -fx-effect: dropshadow(gaussian, #00cc66, 4, 0.3, 0, 0);
+}
+
+.log-entry-info {
+    -fx-text-fill: #3a5570;
+}
+
+
+/* ── BOTTOM CONTROL BAR ─────────────────────────────────────────────────── */
+.control-bar {
+    -fx-background-color: #0a0d14;
+    -fx-border-color: #1a2535 transparent transparent transparent;
+    -fx-border-width: 1;
+    -fx-padding: 10 20 10 20;
+    -fx-spacing: 10;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Playback icon buttons (play / pause / step / reset) */
+.ctrl-btn {
+    -fx-background-color: #0b1525;
+    -fx-border-color: #1a2535;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-text-fill: #4a6480;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 15px;
+    -fx-min-width: 36px;
+    -fx-min-height: 32px;
+    -fx-cursor: hand;
+}
+
+.ctrl-btn:hover {
+    -fx-background-color: #0d1e35;
+    -fx-border-color: #00d4ff;
+    -fx-text-fill: #00d4ff;
+}
+
+.ctrl-btn:pressed {
+    -fx-background-color: #0a1828;
+    -fx-text-fill: #00a0cc;
+}
+
+.ctrl-btn-active {
+    -fx-background-color: #0a1828;
+    -fx-border-color: #00d4ff;
+    -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.3, 0, 0);
+}
+
+/* Speed label */
+.speed-label {
+    -fx-text-fill: #4a6480;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 10px;
+}
+
+/* Speed Slider */
 .speed-slider .track {
-    -fx-background-color: #1a1a2e;
-    -fx-border-color: #00ffcc;
+    -fx-background-color: #1a2535;
+    -fx-background-radius: 1;
+    -fx-padding: 1 0 1 0;
 }
 
 .speed-slider .thumb {
-    -fx-background-color: #00ffcc;
+    -fx-background-color: #00d4ff;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 13px;
+    -fx-pref-height: 13px;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 6, 0.45, 0, 0);
+}
+
+.speed-slider .thumb:hover {
+    -fx-background-color: #40e8ff;
+}
+
+/* Status readout at right side of control bar */
+.status-label {
+    -fx-text-fill: #3a5070;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 10px;
+}
+
+.status-label-ready {
+    -fx-text-fill: #4a6480;
+}
+
+.status-label-solving {
+    -fx-text-fill: #ffaa00;
+    -fx-effect: dropshadow(gaussian, #ffaa00, 5, 0.3, 0, 0);
+}
+
+.status-label-done {
+    -fx-text-fill: #00ff88;
+    -fx-effect: dropshadow(gaussian, #00ff88, 6, 0.3, 0, 0);
+}
+
+.status-label-error {
+    -fx-text-fill: #ff3355;
+}
+
+
+/* ── SCROLL BAR ─────────────────────────────────────────────────────────── */
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #090d14;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #1a2535;
+    -fx-background-radius: 2;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #1e3050;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #2a3a4a;
+    -fx-shape: " ";
+    -fx-padding: 2 0;
+}
+
+
+/* ── SCROLL PANE ────────────────────────────────────────────────────────── */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+
+/* ── TEXT FIELD (user number input on board) ───────────────────────────── */
+.cell-input {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #d0e8f8;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+.cell-input:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
