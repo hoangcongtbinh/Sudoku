@@ -1,5 +1,6 @@
 package com.sudoku.solver;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.sudoku.model.*;
@@ -47,4 +48,3 @@ public class SolveResult {
         return timeToSolve;
     }
 }
-

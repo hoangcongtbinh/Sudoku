@@ -27,7 +27,6 @@ public class BacktrackingSolver implements Solver {
     }
 
     private boolean solveRecursive(Board board, List<Step> steps) {
-        // Gọi thẳng từ Board, cực chuẩn OOP
         int[] cell = board.findEmptyCell();
 
         if (cell == null) return true;
@@ -42,7 +41,7 @@ public class BacktrackingSolver implements Solver {
             if (BoardValidator.isValidMove(board, row, col, val)) {
                 // TRY
                 board.setCell(row, col, val);
-                steps.add(new Step(row, col, empty, val, StepType.TRY));
+                steps.add(new Step(row, col, empty, val, StepType.SOLVER_STEP));
 
                 if (solveRecursive(board, steps)) {
                     return true;
@@ -50,7 +49,7 @@ public class BacktrackingSolver implements Solver {
 
                 // BACKTRACK
                 board.setCell(row, col, empty);
-                steps.add(new Step(row, col, val, empty, StepType.BACKTRACK));
+                steps.add(new Step(row, col, val, empty, StepType.SOLVER_BACKTRACK));
             }
         }
 
