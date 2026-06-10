@@ -84,4 +84,31 @@ public class MRVSolver implements Solver {
     private int countValidOptions(Board board, int row, int col) {
         return BoardValidator.getCandidates(board, row, col).size();
     }
+    // Hàm gợi ý 1 ô tiếp theo dùng MRV
+    public static Step getHintCell(Board board) {
+        if (board == null || BoardValidator.isSolved(board)) {
+            return null;
+        }
+
+        MRVSolver solverInstance = new MRVSolver();
+        int[] bestCellPos = solverInstance.findBestCellMRV(board);
+
+        if (bestCellPos == null) {
+            return null;
+        }
+
+        int row = bestCellPos[0];
+        int col = bestCellPos[1];
+
+        List<Integer> candidates = BoardValidator.getCandidates(board, row, col);
+
+        if (candidates.isEmpty()) {
+            return null;
+        }
+
+        int hintValue = candidates.get(0);
+        int prevValue = board.getCell(row, col); 
+
+        return new Step(row, col, prevValue, hintValue, StepType.HINT);
+    }
 }
