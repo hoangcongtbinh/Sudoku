@@ -9,13 +9,13 @@ public class MRVSolver implements Solver {
 
     @Override
     public SolveResult solve(Board board) {
-        long startTime = System.currentTimeMillis();
         List<Step> steps = new ArrayList<>();
 
+        long startTime = System.nanoTime();
         boolean success = backtrackMRV(board, steps);
 
-        long endTime = System.currentTimeMillis();
-        long durationMs = endTime - startTime;
+        long endTime = System.nanoTime();
+        long durationMs = (endTime - startTime);
 
         return new SolveResult(success, steps, durationMs);
     }

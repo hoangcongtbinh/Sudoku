@@ -195,7 +195,7 @@ public class SASolver implements Solver {
     @Override
     public SolveResult solve(Board board) {
 
-        long startTime = System.currentTimeMillis();
+        long startTime = System.nanoTime();
 
         initializeFixedCells(board);
 
@@ -203,12 +203,12 @@ public class SASolver implements Solver {
 
         if (freeCellCount() == 0) {
 
-            long endTime = System.currentTimeMillis();
+            long endTime = System.nanoTime();
 
             return new SolveResult(
                     BoardValidator.isSolved(board),
                     steps,
-                    endTime - startTime
+                    (endTime - startTime)
             );
         }
 
@@ -274,12 +274,12 @@ public class SASolver implements Solver {
             temperature *= COOLING_RATE;
         }
 
-        long endTime = System.currentTimeMillis();
+        long endTime = System.nanoTime();
 
         return new SolveResult(
                 BoardValidator.isSolved(current),
                 steps,
-                endTime - startTime
+                (endTime - startTime)
         );
     }
 }
