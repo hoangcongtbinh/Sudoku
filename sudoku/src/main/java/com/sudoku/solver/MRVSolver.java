@@ -49,7 +49,7 @@ public class MRVSolver implements Solver {
 
                 // BACKTRACK 
                 board.setCell(row, col, Board.getEmptyValue());
-                steps.add(new Step(row, col, num, Board.getEmptyValue(), StepType.UNDO)); 
+                steps.add(new Step(row, col, num, Board.getEmptyValue(), StepType.BACKTRACK));
             }
         }
 
