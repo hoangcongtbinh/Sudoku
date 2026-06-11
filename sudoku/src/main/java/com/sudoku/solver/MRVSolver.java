@@ -56,7 +56,7 @@ public class MRVSolver implements Solver {
         return false; 
     }
     // Hàm tìm ô trống MRV
-    private int[] findBestCellMRV(Board board) {
+    public static int[] findBestCellMRV(Board board) {
         int[] bestCell = null;
         int minRemaining = Integer.MAX_VALUE;
 
@@ -80,8 +80,9 @@ public class MRVSolver implements Solver {
         }
         return bestCell;
     }
+
     // Hàm đếm số lượng giá trị hợp lệ từ 1-9 có thể điền vào ô
-    private int countValidOptions(Board board, int row, int col) {
+    public static int countValidOptions(Board board, int row, int col) {
         return BoardValidator.getCandidates(board, row, col).size();
     }
 }
