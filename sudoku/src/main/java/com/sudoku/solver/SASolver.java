@@ -6,14 +6,16 @@ import com.sudoku.model.StepType;
 import com.sudoku.validator.BoardValidator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class SASolver implements Solver {
 
-    private static final double INITIAL_TEMP = 1000.0;
-    private static final double COOLING_RATE = 0.995;
+    private static final double INITIAL_TEMP = 2.0;
+    private static final double COOLING_RATE = 0.999;
     private static final double MIN_TEMP = 0.01;
+    private static final int MAX_RESTARTS = 10;
 
     private final Random random = new Random();
     private boolean[][] fixed;
@@ -51,12 +53,40 @@ public class SASolver implements Solver {
     private void initializeBoard(Board board) {
 
         int size = Board.getSize();
+        int boxSize = (int) Math.sqrt(size);
 
-        for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
+        // Duyệt qua từng khối 3x3
+        for (int boxRow = 0; boxRow < boxSize; boxRow++) {
+            for (int boxCol = 0; boxCol < boxSize; boxCol++) {
 
-                if (!fixed[row][col]) {
-                    board.setCell(row, col, random.nextInt(size) + 1);
+                boolean[] present = new boolean[size + 1];
+                List<int[]> emptyCells = new ArrayList<>();
+
+                // Duyệt qua các ô trong khối
+                for (int r = boxRow * boxSize; r < (boxRow + 1) * boxSize; r++) {
+                    for (int c = boxCol * boxSize; c < (boxCol + 1) * boxSize; c++) {
+                        // Thu thập vị trí các ô trống trong khối
+                        if (fixed[r][c]) {
+                            present[board.getCell(r, c)] = true;
+                        } else {
+                            emptyCells.add(new int[]{r, c});
+                        }
+                    }
+                }
+
+                // Liệt kê các số 1-9 chưa được điền
+                List<Integer> missing = new ArrayList<>();
+                for (int val = 1; val <= size; val++) {
+                    if (!present[val]) {
+                        missing.add(val);
+                    }
+                }
+
+                // Trộn các số đó và điền
+                Collections.shuffle(missing, random);
+                for (int i = 0; i < emptyCells.size(); i++) {
+                    int[] cell = emptyCells.get(i);
+                    board.setCell(cell[0], cell[1], missing.get(i));
                 }
             }
         }
@@ -99,95 +129,68 @@ public class SASolver implements Solver {
             }
         }
 
-        // Boxes
-        int boxSize = (int) Math.sqrt(size);
-
-        for (int boxRow = 0; boxRow < boxSize; boxRow++) {
-            for (int boxCol = 0; boxCol < boxSize; boxCol++) {
-
-                int[] count = new int[size + 1];
-
-                for (int row = boxRow * boxSize;
-                     row < (boxRow + 1) * boxSize;
-                     row++) {
-
-                    for (int col = boxCol * boxSize;
-                         col < (boxCol + 1) * boxSize;
-                         col++) {
-
-                        count[board.getCell(row, col)]++;
-                    }
-                }
-
-                for (int value = 1; value <= size; value++) {
-                    if (count[value] > 1) {
-                        conflicts += count[value] - 1;
-                    }
-                }
-            }
-        }
-
+        // Boxes are guaranteed to have 0 conflicts because of box-level initialization and swapping.
         return conflicts;
     }
 
     private Board generateNeighbor(Board board) {
 
         Board neighbor = board.copy();
+        int size = Board.getSize();
+        int boxSize = (int) Math.sqrt(size);
 
-        if (random.nextDouble() < 0.5) {
-
-            int row;
-            int col;
-
-            do {
-                row = random.nextInt(Board.getSize());
-                col = random.nextInt(Board.getSize());
-            } while (fixed[row][col]);
-
-            int oldValue = neighbor.getCell(row, col);
-
-            int newValue;
-
-            do {
-                newValue = random.nextInt(Board.getSize()) + 1;
-            } while (newValue == oldValue);
-
-            neighbor.setCell(row, col, newValue);
-
-        } else {
-
-            int row1;
-            int col1;
-            int row2;
-            int col2;
-
-            do {
-                row1 = random.nextInt(Board.getSize());
-                col1 = random.nextInt(Board.getSize());
-            } while (fixed[row1][col1]);
-
-            do {
-                row2 = random.nextInt(Board.getSize());
-                col2 = random.nextInt(Board.getSize());
-            } while (
-                    fixed[row2][col2]
-                            || (row1 == row2 && col1 == col2)
-            );
-
-            int temp = neighbor.getCell(row1, col1);
-
-            neighbor.setCell(
-                    row1,
-                    col1,
-                    neighbor.getCell(row2, col2)
-            );
-
-            neighbor.setCell(
-                    row2,
-                    col2,
-                    temp
-            );
+        // Duyệt tìm các cu 3x3 có 2+ ô trống
+        List<Integer> candidateBoxes = new ArrayList<>();
+        for (int b = 0; b < size; b++) {
+            int boxRow = b / boxSize;
+            int boxCol = b % boxSize;
+            int freeCount = 0;
+            for (int r = boxRow * boxSize; r < (boxRow + 1) * boxSize; r++) {
+                for (int c = boxCol * boxSize; c < (boxCol + 1) * boxSize; c++) {
+                    if (!fixed[r][c]) {
+                        freeCount++;
+                    }
+                }
+            }
+            if (freeCount >= 2) {
+                candidateBoxes.add(b);
+            }
         }
+
+        if (candidateBoxes.isEmpty()) {
+            return neighbor;
+        }
+
+        // Chọn ngẫu nhiên 1 cụm 3x3
+        int selectedBox = candidateBoxes.get(random.nextInt(candidateBoxes.size()));
+        int boxRow = selectedBox / boxSize;
+        int boxCol = selectedBox % boxSize;
+
+        // Lấy danh sách các ô ko fixed
+        List<int[]> freeCells = new ArrayList<>();
+        for (int r = boxRow * boxSize; r < (boxRow + 1) * boxSize; r++) {
+            for (int c = boxCol * boxSize; c < (boxCol + 1) * boxSize; c++) {
+                if (!fixed[r][c]) {
+                    freeCells.add(new int[]{r, c});
+                }
+            }
+        }
+
+        // Lấy ngẫu nhiên 2 ô ko fixed và tráo đổi giá trị của chúng
+        int idx1 = random.nextInt(freeCells.size());
+        int idx2;
+        do {
+            idx2 = random.nextInt(freeCells.size());
+        } while (idx1 == idx2);
+
+        int[] cell1 = freeCells.get(idx1);
+        int[] cell2 = freeCells.get(idx2);
+
+        int val1 = neighbor.getCell(cell1[0], cell1[1]);
+        int val2 = neighbor.getCell(cell2[0], cell2[1]);
+
+        neighbor.setCell(cell1[0], cell1[1], val2);
+        neighbor.setCell(cell2[0], cell2[1], val1);
 
         return neighbor;
     }
@@ -212,72 +215,85 @@ public class SASolver implements Solver {
             );
         }
 
-        Board current = board.copy();
+        Board currentBestBoard = null;
+        int bestCost = Integer.MAX_VALUE;
 
-        initializeBoard(current);
+        for (int restart = 0; restart < MAX_RESTARTS; restart++) {
+            Board current = board.copy();
+            initializeBoard(current);
+            int currentCost = calculateCost(current);
 
-        int currentCost = calculateCost(current);
+            steps.add(new Step(
+                    -1,
+                    -1,
+                    currentCost,
+                    currentCost,
+                    StepType.SOLVER_STEP
+            ));
 
-        double temperature = INITIAL_TEMP;
+            double temperature = INITIAL_TEMP;
 
-        steps.add(new Step(
-                -1,
-                -1,
-                currentCost,
-                currentCost,
-                StepType.SOLVER_STEP
-        ));
+            while (temperature > MIN_TEMP && currentCost > 0) {
 
-        while (temperature > MIN_TEMP && currentCost > 0) {
+                Board neighbor = generateNeighbor(current);
+                int neighborCost = calculateCost(neighbor);
+                int delta = neighborCost - currentCost;
 
-            Board neighbor = generateNeighbor(current);
+                boolean accepted = false;
 
-            int neighborCost = calculateCost(neighbor);
-
-            int delta = neighborCost - currentCost;
-
-            boolean accepted = false;
-
-            if (delta <= 0) {
-
-                current = neighbor;
-                currentCost = neighborCost;
-                accepted = true;
-
-            } else {
-
-                double probability =
-                        Math.exp(
-                                -((double) delta)
-                                        / temperature
-                        );
-
-                if (random.nextDouble() < probability) {
-
+                if (delta <= 0) {
                     current = neighbor;
                     currentCost = neighborCost;
                     accepted = true;
+                } else {
+                    double probability =
+                            Math.exp(
+                                    -((double) delta)
+                                            / temperature
+                            );
+
+                    if (random.nextDouble() < probability) {
+                        current = neighbor;
+                        currentCost = neighborCost;
+                        accepted = true;
+                    }
+                }
+
+                if (accepted) {
+                    steps.add(new Step(
+                            -1,
+                            -1,
+                            currentCost,
+                            currentCost,
+                            StepType.SOLVER_STEP
+                    ));
+                }
+
+                temperature *= COOLING_RATE;
+            }
+
+            if (currentCost < bestCost) {
+                bestCost = currentCost;
+                currentBestBoard = current.copy();
+            }
+
+            if (currentCost == 0) {
+                break;
+            }
+        }
+
+        if (bestCost == 0 && currentBestBoard != null) {
+            for (int r = 0; r < Board.getSize(); r++) {
+                for (int c = 0; c < Board.getSize(); c++) {
+                    board.setCell(r, c, currentBestBoard.getCell(r, c));
                 }
             }
-
-            if (accepted) {
-
-                steps.add(new Step(
-                        -1,
-                        -1,
-                        currentCost,
-                        currentCost,
-                        StepType.SOLVER_STEP
-                ));
-            }
-
-            temperature *= COOLING_RATE;
         }
 
         long endTime = System.nanoTime();
 
         return new SolveResult(
-                BoardValidator.isSolved(current),
+                bestCost == 0,
                 steps,
                 (endTime - startTime)
         );
