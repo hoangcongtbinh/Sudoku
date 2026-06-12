@@ -13,6 +13,8 @@ public class SudokuCell extends StackPane {
     private Label numberLabel;
     private boolean highlighted;
 
+
+
     public SudokuCell(int row, int col) {
         this.row = row;
         this.col = col;

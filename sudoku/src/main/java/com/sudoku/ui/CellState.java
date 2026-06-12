@@ -8,3 +8,4 @@ public enum CellState {
     BACKTRACK,  // Just backtracked (red flash)
     SOLVED      // Correctly solved (green)
 }
+

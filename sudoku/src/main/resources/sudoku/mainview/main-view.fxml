@@ -7,8 +7,12 @@
 <?import com.sudoku.ui.StepLogPanel?>
 <?import com.sudoku.ui.SudokuBoard?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -20,76 +24,265 @@
             fx:controller="com.sudoku.ui.GameController"
             stylesheets="@../css/styles.css">
 
-    <!-- ══ TOP: Title bar ═══════════════════════════════════════════════ -->
+    <!-- ══ TOP: Title bar + Mode switcher ═══════════════════════════════════ -->
     <top>
-        <HBox styleClass="title-bar" alignment="CENTER_LEFT" spacing="8">
-            <Label text="SUDOKU" styleClass="title-main"/>
-            <Label text="·" styleClass="title-sep"/>
-            <Label text="SOLVER" styleClass="title-sub"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="ALGORITHM VISUALIZER" styleClass="title-badge"/>
-        </HBox>
+        <VBox>
+            <HBox styleClass="title-bar" alignment="CENTER_LEFT" spacing="8">
+                <Label text="SUDOKU" styleClass="title-main"/>
+                <Label text="·"      styleClass="title-sep"/>
+                <Label text="SOLVER" styleClass="title-sub"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="ALGORITHM VISUALIZER" styleClass="title-badge"/>
+            </HBox>
+            <!-- Mode tabs -->
+            <HBox styleClass="mode-switcher" spacing="0" fillHeight="true">
+                <Button fx:id="tabPlay"    text="▶  PLAY"
+                        styleClass="mode-tab,mode-tab-active"
+                        onAction="#onModePlay"
+                        maxHeight="1.7976931348623157E308"/>
+                <Button fx:id="tabSolve"   text="⚙  SOLVE"
+                        styleClass="mode-tab"
+                        onAction="#onModeSolve"
+                        maxHeight="1.7976931348623157E308"/>
+                <Button fx:id="tabCompare" text="≡  COMPARE"
+                        styleClass="mode-tab"
+                        onAction="#onModeCompare"
+                        maxHeight="1.7976931348623157E308"/>
+            </HBox>
+        </VBox>
     </top>
 
-    <!-- ══ CENTER: Sudoku board ══════════════════════════════════════════ -->
+    <!-- ══ CENTER: Sudoku Board (shared — never replaced on mode switch) ════ -->
     <center>
         <StackPane styleClass="board-wrapper">
             <SudokuBoard fx:id="sudokuBoard"/>
         </StackPane>
     </center>
 
-    <!-- ══ RIGHT: Control panel ══════════════════════════════════════════ -->
+    <!-- ══ RIGHT: Mode panels stacked, one visible at a time ════════════════ -->
     <right>
-        <VBox spacing="12"
-              styleClass="right-panel"
-              alignment="TOP_CENTER"
-              prefWidth="250">
+        <StackPane prefWidth="270">
 
-            <!-- Algorithm selector -->
-            <VBox spacing="5" styleClass="control-section">
-                <Label text="ALGORITHM" styleClass="section-label"/>
-                <AlgorithmSelector fx:id="algorithmSelector"
-                                   styleClass="cyber-select"
-                                   maxWidth="1.7976931348623157E308"/>
+            <!-- ─────────────────────── PLAY PANEL ─────────────────────── -->
+            <VBox fx:id="playPanel"
+                  styleClass="right-panel"
+                  spacing="11"
+                  alignment="TOP_CENTER">
+
+                <!-- Timer + difficulty row -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="3" HBox.hgrow="ALWAYS">
+                        <Label text="TIME" styleClass="section-label"/>
+                        <Label fx:id="timerLabel" text="00:00" styleClass="timer-display"/>
+                    </VBox>
+                    <VBox spacing="3">
+                        <Label text="DIFFICULTY" styleClass="section-label"/>
+                        <DifficultySelector fx:id="difficultySelector"
+                                            styleClass="cyber-select"
+                                            prefWidth="110"/>
+                    </VBox>
+                </HBox>
+
+                <Button text="NEW GAME"
+                        fx:id="newGameButton"
+                        styleClass="cyber-button"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#onNewGame"/>
+
+                <Separator styleClass="neon-divider"/>
+
+                <!-- Number pad 3×3 + erase -->
+                <VBox spacing="5" styleClass="control-section">
+                    <Label text="INPUT" styleClass="section-label"/>
+                    <HBox spacing="5">
+                        <Button fx:id="numBtn1" text="1" styleClass="num-btn" onAction="#onNum1"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button fx:id="numBtn2" text="2" styleClass="num-btn" onAction="#onNum2"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button fx:id="numBtn3" text="3" styleClass="num-btn" onAction="#onNum3"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                    </HBox>
+                    <HBox spacing="5">
+                        <Button fx:id="numBtn4" text="4" styleClass="num-btn" onAction="#onNum4"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button fx:id="numBtn5" text="5" styleClass="num-btn" onAction="#onNum5"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button fx:id="numBtn6" text="6" styleClass="num-btn" onAction="#onNum6"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                    </HBox>
+                    <HBox spacing="5">
+                        <Button fx:id="numBtn7" text="7" styleClass="num-btn" onAction="#onNum7"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button fx:id="numBtn8" text="8" styleClass="num-btn" onAction="#onNum8"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button fx:id="numBtn9" text="9" styleClass="num-btn" onAction="#onNum9"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                    </HBox>
+                    <Button text="✕  ERASE"
+                            styleClass="num-btn,num-erase-btn"
+                            onAction="#onErase"
+                            maxWidth="1.7976931348623157E308"/>
+                </VBox>
+
+                <Separator styleClass="neon-divider"/>
+
+                <!-- Action buttons -->
+                <VBox spacing="6" styleClass="control-section">
+                    <Label text="ACTIONS" styleClass="section-label"/>
+                    <HBox spacing="6">
+                        <Button text="HINT" fx:id="hintButton" styleClass="cyber-button"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                onAction="#onHint"/>
+                        <Button text="UNDO" fx:id="undoButton" styleClass="cyber-button"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                onAction="#onUndo"/>
+                    </HBox>
+                    <Button text="CHECK SOLUTION"
+                            fx:id="checkButton"
+                            styleClass="cyber-button-primary"
+                            maxWidth="1.7976931348623157E308"
+                            onAction="#onCheck"/>
+                </VBox>
+
+                <Separator styleClass="neon-divider"/>
+
+                <!-- Play progress stats -->
+                <VBox styleClass="stats-panel" spacing="5">
+                    <Label text="PROGRESS" styleClass="section-label" style="-fx-padding:0;"/>
+                    <HBox styleClass="stats-row">
+                        <Label text="Mistakes"  styleClass="stats-key"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="mistakesLabel" text="0 / 3" styleClass="stats-value-red"/>
+                    </HBox>
+                    <HBox styleClass="stats-row">
+                        <Label text="Hints used" styleClass="stats-key"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="hintsLabel"    text="0"      styleClass="stats-value-dim"/>
+                    </HBox>
+                    <HBox styleClass="stats-row">
+                        <Label text="Filled"     styleClass="stats-key"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="filledLabel"   text="0 / 81" styleClass="stats-value"/>
+                    </HBox>
+                </VBox>
+
             </VBox>
 
-            <!-- Difficulty selector -->
-            <VBox spacing="5" styleClass="control-section">
-                <Label text="DIFFICULTY" styleClass="section-label"/>
-                <DifficultySelector fx:id="difficultySelector"
-                                    styleClass="cyber-select"
-                                    maxWidth="1.7976931348623157E308"/>
+            <!-- ─────────────────────── SOLVE PANEL ─────────────────────── -->
+            <VBox fx:id="solvePanel"
+                  styleClass="right-panel"
+                  spacing="12"
+                  alignment="TOP_CENTER"
+                  visible="false"
+                  managed="false">
+
+                <VBox spacing="5" styleClass="control-section">
+                    <Label text="ALGORITHM" styleClass="section-label"/>
+                    <AlgorithmSelector fx:id="algorithmSelector"
+                                       styleClass="cyber-select"
+                                       maxWidth="1.7976931348623157E308"/>
+                </VBox>
+
+                <Separator styleClass="neon-divider"/>
+
+                <Button text="SOLVE THIS BOARD"
+                        fx:id="solveButton"
+                        styleClass="cyber-button-primary"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#onSolve"/>
+                <Button text="RESET BOARD"
+                        fx:id="resetButton"
+                        styleClass="cyber-button-danger"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#onReset"/>
+
+                <Separator styleClass="neon-divider"/>
+
+                <StatsPanel    fx:id="statsPanel"    styleClass="stats-panel"
+                               maxWidth="1.7976931348623157E308"/>
+
+                <Separator styleClass="neon-divider"/>
+
+                <StepLogPanel  fx:id="stepLogPanel"  styleClass="step-log-panel"
+                               maxWidth="1.7976931348623157E308"
+                               VBox.vgrow="ALWAYS"/>
+
             </VBox>
 
-            <Separator styleClass="neon-divider"/>
+            <!-- ────────────────────── COMPARE PANEL ────────────────────── -->
+            <VBox fx:id="comparePanel"
+                  styleClass="right-panel"
+                  spacing="12"
+                  alignment="TOP_CENTER"
+                  visible="false"
+                  managed="false">
 
-            <!-- New Game -->
-            <Button text="NEW GAME"
-                    fx:id="newGameButton"
-                    styleClass="cyber-button"
-                    maxWidth="1.7976931348623157E308"/>
+                <VBox styleClass="stats-panel" spacing="7">
+                    <Label text="SELECT ALGORITHMS" styleClass="section-label"
+                           style="-fx-padding:0;"/>
+                    <CheckBox fx:id="cbBacktracking" text="Backtracking"
+                              styleClass="algo-check" selected="true"/>
+                    <CheckBox fx:id="cbMRV"          text="MRV Heuristic"
+                              styleClass="algo-check" selected="true"/>
+                    <CheckBox fx:id="cbSA"           text="Simulated Annealing"
+                              styleClass="algo-check" selected="true"/>
+                </VBox>
 
-            <Separator styleClass="neon-divider"/>
+                <Button text="RUN COMPARISON"
+                        fx:id="runCompareButton"
+                        styleClass="cyber-button-primary"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#onRunComparison"/>
 
-            <!-- Stats -->
-            <StatsPanel fx:id="statsPanel"
-                        styleClass="stats-panel"
-                        maxWidth="1.7976931348623157E308"/>
+                <Separator styleClass="neon-divider"/>
 
-            <Separator styleClass="neon-divider"/>
+                <VBox spacing="5" VBox.vgrow="ALWAYS">
+                    <Label text="RESULTS" styleClass="section-label"/>
+                    <TableView fx:id="compareTable"
+                               styleClass="compare-table"
+                               VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colAlgo"  text="ALGORITHM" prefWidth="95"
+                                         resizable="false" sortable="false"/>
+                            <TableColumn fx:id="colSteps" text="STEPS"     prefWidth="50"
+                                         resizable="false" sortable="false"/>
+                            <TableColumn fx:id="colBt"    text="BT"        prefWidth="35"
+                                         resizable="false" sortable="false"/>
+                            <TableColumn fx:id="colTime"  text="ms"        prefWidth="53"
+                                         resizable="false" sortable="false"/>
+                        </columns>
+                        <placeholder>
+                            <Label text="Run comparison to see results"
+                                   styleClass="table-placeholder"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
 
-            <!-- Step log — grows to fill remaining space -->
-            <StepLogPanel fx:id="stepLogPanel"
-                          styleClass="step-log-panel"
-                          maxWidth="1.7976931348623157E308"
-                          VBox.vgrow="ALWAYS"/>
+                <VBox fx:id="compareBars" styleClass="compare-bars" spacing="6">
+                    <Label text="RELATIVE SPEED" styleClass="section-label"/>
+                </VBox>
 
-        </VBox>
+            </VBox>
+
+        </StackPane>
     </right>
 
-    <!-- ══ BOTTOM: Playback controls ═════════════════════════════════════ -->
+    <!-- ══ BOTTOM: Adaptive controls ════════════════════════════════════════ -->
     <bottom>
-        <ControlPanel fx:id="controlPanel" styleClass="control-bar"/>
+        <StackPane>
+            <HBox fx:id="playBottomBar"
+                  styleClass="control-bar"
+                  spacing="10"
+                  alignment="CENTER_LEFT">
+                <Label text="▶  PLAY MODE" style="-fx-text-fill:#2a4060;-fx-font-family:Consolas;-fx-font-size:10px;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="playStatusLabel" text="READY" styleClass="status-label-ready"/>
+            </HBox>
+            <ControlPanel fx:id="controlPanel"
+                          styleClass="control-bar"
+                          visible="false"
+                          managed="false"/>
+        </StackPane>
     </bottom>
 
 </BorderPane>

@@ -47,4 +47,17 @@ public class SolveResult {
     public long getTimeToSolve() {
         return timeToSolve;
     }
+
+    public int getBacktrackCount() {
+        if (steps == null) {
+            return 0;
+        }
+        int count = 0;
+        for (Step step : steps) {
+            if (step.isBacktrack()) {
+                count++;
+            }
+        }
+        return count;
+    }
 }
