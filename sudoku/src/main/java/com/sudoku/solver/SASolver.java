@@ -22,6 +22,13 @@ public class SASolver implements Solver {
 
     private List<Step> steps;
 
+    private int lastSwapRow1;
+    private int lastSwapCol1;
+    private int lastSwapVal1;
+    private int lastSwapRow2;
+    private int lastSwapCol2;
+    private int lastSwapVal2;
+
     private void initializeFixedCells(Board board) {
 
         int size = Board.getSize();
@@ -50,7 +57,7 @@ public class SASolver implements Solver {
         return count;
     }
 
-    private void initializeBoard(Board board) {
+    private void initializeBoard(Board board, List<Step> steps) {
 
         int size = Board.getSize();
         int boxSize = (int) Math.sqrt(size);
@@ -86,7 +93,12 @@ public class SASolver implements Solver {
                 Collections.shuffle(missing, random);
                 for (int i = 0; i < emptyCells.size(); i++) {
                     int[] cell = emptyCells.get(i);
-                    board.setCell(cell[0], cell[1], missing.get(i));
+                    int prevVal = board.getCell(cell[0], cell[1]);
+                    int newVal = missing.get(i);
+                    board.setCell(cell[0], cell[1], newVal);
+                    if (steps != null) {
+                        steps.add(new Step(cell[0], cell[1], prevVal, newVal, StepType.SOLVER_STEP));
+                    }
                 }
             }
         }
@@ -182,7 +194,6 @@ public class SASolver implements Solver {
         do {
             idx2 = random.nextInt(freeCells.size());
         } while (idx1 == idx2);
-
         int[] cell1 = freeCells.get(idx1);
         int[] cell2 = freeCells.get(idx2);
 
@@ -191,6 +202,13 @@ public class SASolver implements Solver {
 
         neighbor.setCell(cell1[0], cell1[1], val2);
         neighbor.setCell(cell2[0], cell2[1], val1);
+
+        this.lastSwapRow1 = cell1[0];
+        this.lastSwapCol1 = cell1[1];
+        this.lastSwapVal1 = val1;
+        this.lastSwapRow2 = cell2[0];
+        this.lastSwapCol2 = cell2[1];
+        this.lastSwapVal2 = val2;
 
         return neighbor;
     }
@@ -219,8 +237,20 @@ public class SASolver implements Solver {
         int bestCost = Integer.MAX_VALUE;
 
         for (int restart = 0; restart < MAX_RESTARTS; restart++) {
+            // Reset the board UI for the new restart in the step list
+            if (restart > 0 && steps != null) {
+                int size = Board.getSize();
+                for (int r = 0; r < size; r++) {
+                    for (int c = 0; c < size; c++) {
+                        if (!fixed[r][c]) {
+                            steps.add(new Step(r, c, board.getCell(r, c), Board.getEmptyValue(), StepType.BACKTRACK));
+                        }
+                    }
+                }
+            }
+
             Board current = board.copy();
-            initializeBoard(current);
+            initializeBoard(current, steps);
             int currentCost = calculateCost(current);
 
             steps.add(new Step(
@@ -260,6 +290,16 @@ public class SASolver implements Solver {
                 }
 
                 if (accepted) {
+                    steps.add(new Step(
+                            lastSwapRow1, lastSwapCol1,
+                            lastSwapVal1, lastSwapVal2,
+                            StepType.SOLVER_STEP
+                    ));
+                    steps.add(new Step(
+                            lastSwapRow2, lastSwapCol2,
+                            lastSwapVal2, lastSwapVal1,
+                            StepType.SOLVER_STEP
+                    ));
                     steps.add(new Step(
                             -1,
                             -1,
