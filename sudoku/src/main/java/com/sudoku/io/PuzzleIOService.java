@@ -1,28 +1,50 @@
 package com.sudoku.io;
 
-import com.sudoku.model.Board;
-
-import java.io.IOException;
+import java.io.*;
 
 public class PuzzleIOService {
 
-    private final PuzzleReader reader =
-            new PuzzleReader();
+    /**
+     * Đọc puzzle từ file text định dạng 9 dòng, mỗi dòng 9 số (0 = ô trống)
+     */
+    public static int[][] readFromFile(File file) throws IOException {
+        int[][] grid = new int[9][9];
 
-    private final PuzzleWriter writer =
-            new PuzzleWriter();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            int row = 0;
 
-    public Board loadPuzzle(String path)
-            throws IOException {
+            while ((line = reader.readLine()) != null && row < 9) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
 
-        return reader.read(path);
+                String[] parts = line.split("\\s+");
+                for (int col = 0; col < 9 && col < parts.length; col++) {
+                    grid[row][col] = Integer.parseInt(parts[col].trim());
+                }
+                row++;
+            }
+
+            if (row < 9) {
+                throw new IOException("Invalid puzzle format: expected 9 rows, found " + row);
+            }
+        }
+
+        return grid;
     }
 
-    public void savePuzzle(
-            Board board,
-            String path)
-            throws IOException {
-
-        writer.write(board, path);
+    /**
+     * Ghi puzzle ra file text định dạng 9 dòng
+     */
+    public static void writeToFile(File file, int[][] grid) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
+                    writer.write(String.valueOf(grid[row][col]));
+                    if (col < 8) writer.write(" ");
+                }
+                writer.newLine();
+            }
+        }
     }
 }

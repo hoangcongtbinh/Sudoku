@@ -1,7 +1,10 @@
 package com.sudoku.ui;
 
 import com.sudoku.generator.BoardGenerator;
+import com.sudoku.highscore.HighScoreManager;
+import com.sudoku.io.PuzzleIOService;
 import com.sudoku.model.*;
+import com.sudoku.validator.BoardValidator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -9,11 +12,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
-
 import com.sudoku.solver.*;
+import com.sudoku.benchmark.AlgorithmComparison;
+import com.sudoku.benchmark.AlgorithmStats;
 
+import java.io.File;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +35,7 @@ public class GameController {
     @FXML private ControlPanel controlPanel;
     @FXML private Button newGameButton;
 
-    // Additional FXML components for Play Mode
+    // Play Mode
     @FXML private VBox playPanel;
     @FXML private VBox solvePanel;
     @FXML private VBox comparePanel;
@@ -44,17 +50,27 @@ public class GameController {
     @FXML private Button checkButton;
     @FXML private Button solveButton;
     @FXML private Button resetButton;
+    @FXML private Button importButton;
+    @FXML private Button exportButton;
+    @FXML private Button highScoreButton;
     private Stack<PlayMove> moveHistory;
 
     // Compare mode components
     @FXML private CheckBox cbBacktracking;
     @FXML private CheckBox cbMRV;
     @FXML private CheckBox cbSA;
-    @FXML private TableView<?> compareTable;
+    @FXML private TableView<AlgorithmStats> compareTable;
     @FXML private VBox compareBars;
+    @FXML private Button runCompareButton;
+
+    // Mode tabs
+    @FXML private Button tabPlay;
+    @FXML private Button tabSolve;
+    @FXML private Button tabCompare;
 
     // -------- Backend State --------
     private Board currentBoard;
+    private Board solutionBoard;  // Lưu solution để kiểm tra đúng/sai
     private Solver currentSolver;
     private Timeline animationTimeline;
     private List<Step> currentSteps;
@@ -65,6 +81,15 @@ public class GameController {
     private int totalSteps;
     private int hintsUsed = 0;
     private int mistakes = 0;
+    private static final int MAX_MISTAKES = 3;
+
+    // Play mode timer
+    private Timeline playTimer;
+    private long playStartTime;
+    private long playElapsedSeconds;
+
+    // High score
+    private HighScoreManager highScoreManager;
 
     // -------- Cell Selection --------
     private int selectedRow = -1;
@@ -73,18 +98,19 @@ public class GameController {
     // -------- Initialization --------
     @FXML
     public void initialize() {
-        // Animation timer
         isPlaying = new AtomicBoolean(false);
-        animationTimeline = new Timeline(new KeyFrame(Duration.millis(300), e -> playNextStep()));
+        animationTimeline = new Timeline();
         animationTimeline.setCycleCount(Timeline.INDEFINITE);
 
         moveHistory = new Stack<>();
+        highScoreManager = new HighScoreManager();
+
         setupUI();
         setupCellSelection();
+        setupKeyboardInput();
         newGame();
         attachEventHandlers();
 
-        // Default to Play mode
         showPlayMode();
     }
 
@@ -106,7 +132,27 @@ public class GameController {
         }
     }
 
-    // Inner class để lưu thông tin một nước đi
+    /**
+     * Bắt phím số từ bàn phím
+     */
+    private void setupKeyboardInput() {
+        if (sudokuBoard != null) {
+            sudokuBoard.setOnKeyPressed(event -> {
+                String text = event.getText();
+                if (text != null && text.matches("[1-9]")) {
+                    int num = Integer.parseInt(text);
+                    setValueOnSelectedCell(num);
+                } else if (event.getCode().toString().equals("BACK_SPACE") ||
+                        event.getCode().toString().equals("DELETE")) {
+                    onErase();
+                } else if (event.getCode().toString().equals("Z") && event.isControlDown()) {
+                    onUndo();
+                }
+            });
+            sudokuBoard.setFocusTraversable(true);
+        }
+    }
+
     private static class PlayMove {
         int row, col, oldValue, newValue;
         PlayMove(int row, int col, int oldValue, int newValue) {
@@ -126,7 +172,11 @@ public class GameController {
             controlPanel.getPauseButton().setOnAction(e -> stopAnimation());
             controlPanel.getResetButton().setOnAction(e -> resetToOriginal());
             controlPanel.getStopButton().setOnAction(e -> resetToOriginal());
-            controlPanel.getSpeedSlider().valueProperty().addListener((obs, old, val) -> updateAnimationSpeed());
+
+            // FIX: Speed slider - chỉ cập nhật duration, không recreate timeline khi đang chạy
+            controlPanel.getSpeedSlider().valueProperty().addListener((obs, old, val) -> {
+                updateAnimationSpeed(val.doubleValue());
+            });
         }
 
         if (algorithmSelector != null) {
@@ -138,9 +188,38 @@ public class GameController {
         if (difficultySelector != null) {
             difficultySelector.valueProperty().addListener((obs, old, val) -> onNewGame());
         }
+
+        // Import/Export buttons
+        if (importButton != null) {
+            importButton.setOnAction(e -> onImport());
+        }
+        if (exportButton != null) {
+            exportButton.setOnAction(e -> onExport());
+        }
+
+        // High score button
+        if (highScoreButton != null) {
+            highScoreButton.setOnAction(e -> showHighScores());
+        }
+
+        // Compare button
+        if (runCompareButton != null) {
+            runCompareButton.setOnAction(e -> onRunComparison());
+        }
+
+        // Tab buttons
+        if (tabPlay != null) {
+            tabPlay.setOnAction(e -> { onModePlay(); updateTabStyles(tabPlay); });
+        }
+        if (tabSolve != null) {
+            tabSolve.setOnAction(e -> { onModeSolve(); updateTabStyles(tabSolve); });
+        }
+        if (tabCompare != null) {
+            tabCompare.setOnAction(e -> { onModeCompare(); updateTabStyles(tabCompare); });
+        }
     }
 
-    // ==================== MODE SWITCHING METHODS ====================
+    // ==================== MODE SWITCHING ====================
 
     @FXML
     private void onModePlay() {
@@ -157,7 +236,20 @@ public class GameController {
         showCompareMode();
     }
 
+    private void updateTabStyles(Button activeTab) {
+        if (tabPlay != null) tabPlay.getStyleClass().removeAll("mode-tab-active");
+        if (tabSolve != null) tabSolve.getStyleClass().removeAll("mode-tab-active");
+        if (tabCompare != null) tabCompare.getStyleClass().removeAll("mode-tab-active");
+
+        if (activeTab != null) {
+            activeTab.getStyleClass().add("mode-tab-active");
+        }
+    }
+
     private void showPlayMode() {
+        stopAnimation();
+        stopPlayTimer();
+
         if (playPanel != null) {
             playPanel.setVisible(true);
             playPanel.setManaged(true);
@@ -178,10 +270,13 @@ public class GameController {
             controlPanel.setVisible(false);
             controlPanel.setManaged(false);
         }
+        updateTabStyles(tabPlay);
         appendLog("Switched to PLAY mode");
     }
 
     private void showSolveMode() {
+        stopPlayTimer();
+
         if (playPanel != null) {
             playPanel.setVisible(false);
             playPanel.setManaged(false);
@@ -202,10 +297,14 @@ public class GameController {
             controlPanel.setVisible(true);
             controlPanel.setManaged(true);
         }
+        updateTabStyles(tabSolve);
         appendLog("Switched to SOLVE mode");
     }
 
     private void showCompareMode() {
+        stopAnimation();
+        stopPlayTimer();
+
         if (playPanel != null) {
             playPanel.setVisible(false);
             playPanel.setManaged(false);
@@ -226,6 +325,7 @@ public class GameController {
             controlPanel.setVisible(false);
             controlPanel.setManaged(false);
         }
+        updateTabStyles(tabCompare);
         appendLog("Switched to COMPARE mode");
     }
 
@@ -234,19 +334,31 @@ public class GameController {
     @FXML
     private void onNewGame() {
         stopAnimation();
+        stopPlayTimer();
+
         Difficulty diff = difficultySelector.getSelectedDifficulty();
         currentBoard = BoardGenerator.generatestaticBoard(diff);
         sudokuBoard.setBoard(currentBoard.getGrid());
+
+        // Tạo solution board để kiểm tra
+        solutionBoard = currentBoard.copy();
+        Solver solver = new BacktrackingSolver();
+        SolveResult result = solver.solve(solutionBoard);
+        if (result.isSolved()) {
+            solutionBoard = result.getFinalBoard() != null ? result.getFinalBoard() : solutionBoard;
+        }
+
         refreshSolver();
         resetStats();
         clearLog();
         mistakes = 0;
         hintsUsed = 0;
+        moveHistory.clear();
         updatePlayStats();
+        startPlayTimer();
         appendLog("New game started - Difficulty: " + diff);
     }
 
-    // Keep original newGame method for compatibility
     private void newGame() {
         onNewGame();
     }
@@ -311,7 +423,12 @@ public class GameController {
     @FXML
     private void onErase() {
         if (selectedRow >= 0 && selectedCol >= 0 && isEditableCell(selectedRow, selectedCol)) {
+            int oldValue = sudokuBoard.getValueAt(selectedRow, selectedCol);
+            if (oldValue != 0) {
+                moveHistory.push(new PlayMove(selectedRow, selectedCol, oldValue, 0));
+            }
             sudokuBoard.updateCell(selectedRow, selectedCol, 0, CellState.EMPTY);
+            sudokuBoard.validateBoard(); // Kiểm tra lỗi sau khi xóa
             updatePlayStats();
             appendLog("Erased cell (" + (selectedRow + 1) + ", " + (selectedCol + 1) + ")");
         } else {
@@ -321,12 +438,53 @@ public class GameController {
 
     @FXML
     private void onHint() {
-        if (selectedRow >= 0 && selectedCol >= 0 && isEditableCell(selectedRow, selectedCol)) {
-            hintsUsed++;
-            updatePlayStats();
-            appendLog("Hint requested for cell (" + (selectedRow + 1) + ", " + (selectedCol + 1) + ")");
-        } else {
-            appendLog("Please select an empty cell first");
+        int row = selectedRow, col = selectedCol;
+
+        // Nếu không có ô được chọn hoặc ô không thể sửa, tìm ô trống đầu tiên
+        if (row == -1 || !isEditableCell(row, col)) {
+            int[][] grid = sudokuBoard.getCurrentBoard();
+            boolean found = false;
+            for (int r = 0; r < 9 && !found; r++) {
+                for (int c = 0; c < 9 && !found; c++) {
+                    if (grid[r][c] == 0 && isEditableCell(r, c)) {
+                        row = r; col = c;
+                        found = true;
+                    }
+                }
+            }
+            if (!found) {
+                appendLog("No empty cells to hint");
+                return;
+            }
+        }
+
+        // Tìm giá trị đúng từ solution board
+        if (solutionBoard != null) {
+            int hintValue = solutionBoard.getCell(row, col);
+            if (hintValue > 0) {
+                final int hintRow = row;
+                final int hintCol = col;
+
+                // Lưu move history
+                int oldValue = sudokuBoard.getValueAt(row, col);
+                moveHistory.push(new PlayMove(row, col, oldValue, hintValue));
+
+                sudokuBoard.updateCell(hintRow, hintCol, hintValue, CellState.HINT);
+                sudokuBoard.validateBoard();
+                hintsUsed++;
+                updatePlayStats();
+                appendLog("Hint: (" + (hintRow+1) + "," + (hintCol+1) + ") → " + hintValue);
+
+                // Sau 2 giây chuyển thành user-input
+                Timeline hintTimeline = new Timeline(new KeyFrame(Duration.seconds(2), e -> {
+                    if (sudokuBoard.getValueAt(hintRow, hintCol) == hintValue) {
+                        sudokuBoard.updateCell(hintRow, hintCol, hintValue, CellState.USER_INPUT);
+                    }
+                }));
+                hintTimeline.play();
+
+                checkWinCondition();
+            }
         }
     }
 
@@ -337,11 +495,11 @@ public class GameController {
             return;
         }
         PlayMove lastMove = moveHistory.pop();
-        // Khôi phục giá trị cũ
-        sudokuBoard.updateCell(lastMove.row, lastMove.col, lastMove.oldValue, CellState.EMPTY);
+        sudokuBoard.updateCell(lastMove.row, lastMove.col, lastMove.oldValue,
+                lastMove.oldValue == 0 ? CellState.EMPTY : CellState.USER_INPUT);
+        sudokuBoard.validateBoard();
         updatePlayStats();
         appendLog("Undo: restored (" + (lastMove.row+1) + "," + (lastMove.col+1) + ") to " + lastMove.oldValue);
-        // Cập nhật lại selected cell (tuỳ chọn)
         selectedRow = lastMove.row;
         selectedCol = lastMove.col;
         sudokuBoard.highlightCell(selectedRow, selectedCol);
@@ -350,36 +508,86 @@ public class GameController {
     @FXML
     private void onCheck() {
         boolean isComplete = checkBoardComplete();
-        if (isComplete) {
+        boolean noErrors = !sudokuBoard.validateBoard();
+
+        if (isComplete && noErrors) {
+            stopPlayTimer();
             if (playStatusLabel != null) {
                 playStatusLabel.setText("✓ SOLVED!");
                 playStatusLabel.setStyle("-fx-text-fill: #00ff44;");
             }
-            appendLog("✓ Puzzle solved correctly!");
+
+            // Lưu high score
+            GameSession session = new GameSession(
+                    difficultySelector.getSelectedDifficulty(),
+                    playElapsedSeconds * 1000,
+                    mistakes,
+                    hintsUsed
+            );
+            session.setFinished(true);
+            boolean isNewRecord = highScoreManager.updateHighScore(session);
+
+            String msg = "✓ Puzzle solved correctly!";
+            if (isNewRecord) {
+                msg += " 🏆 NEW RECORD!";
+            }
+            msg += " Time: " + formatTime(playElapsedSeconds);
+            appendLog(msg);
+
+            showHighScores();
         } else {
             if (playStatusLabel != null) {
-                playStatusLabel.setText("✗ INCOMPLETE");
+                playStatusLabel.setText("✗ INCOMPLETE OR ERRORS");
                 playStatusLabel.setStyle("-fx-text-fill: #ff3300;");
             }
-            appendLog("✗ Board not yet complete.");
+            appendLog("✗ Board has errors or is incomplete.");
         }
     }
 
     private void setValueOnSelectedCell(int value) {
         if (selectedRow >= 0 && selectedCol >= 0 && isEditableCell(selectedRow, selectedCol)) {
             int oldValue = sudokuBoard.getValueAt(selectedRow, selectedCol);
-            // Lưu vào history trước khi thay đổi
+
+            // Kiểm tra có đúng không (so với solution)
+            boolean isCorrect = true;
+            if (solutionBoard != null) {
+                isCorrect = solutionBoard.getCell(selectedRow, selectedCol) == value;
+            }
+
             if (oldValue != value) {
                 moveHistory.push(new PlayMove(selectedRow, selectedCol, oldValue, value));
             }
-            sudokuBoard.updateCell(selectedRow, selectedCol, value, CellState.SOLVED);
-            updatePlayStats();
-            appendLog("Set cell (" + (selectedRow + 1) + ", " + (selectedCol + 1) + ") to " + value);
 
-            // Kiểm tra nếu sai (dựa vào solution có sẵn? Hoặc đơn giản là tăng mistakes)
-            // Nếu muốn kiểm tra lỗi, cần có solutionBoard. Ở đây tạm thời bỏ qua.
+            sudokuBoard.updateCell(selectedRow, selectedCol, value, CellState.USER_INPUT);
+
+            // Kiểm tra lỗi ngay lập tức
+            boolean hasError = sudokuBoard.validateBoard();
+
+            if (hasError) {
+                mistakes++;
+                if (mistakes >= MAX_MISTAKES) {
+                    appendLog("💀 Game Over! Too many mistakes.");
+                    stopPlayTimer();
+                    if (playStatusLabel != null) {
+                        playStatusLabel.setText("GAME OVER");
+                        playStatusLabel.setStyle("-fx-text-fill: #ff3355;");
+                    }
+                }
+            }
+
+            updatePlayStats();
+            appendLog("Set cell (" + (selectedRow + 1) + ", " + (selectedCol + 1) + ") to " + value
+                    + (isCorrect ? " ✓" : " ?"));
+
+            checkWinCondition();
         } else {
             appendLog("Please select an empty cell first");
+        }
+    }
+
+    private void checkWinCondition() {
+        if (checkBoardComplete() && !sudokuBoard.validateBoard()) {
+            onCheck();
         }
     }
 
@@ -393,7 +601,7 @@ public class GameController {
         int filled = countFilledCells();
         if (filledLabel != null) filledLabel.setText(filled + " / 81");
         if (hintsLabel != null) hintsLabel.setText(String.valueOf(hintsUsed));
-        if (mistakesLabel != null) mistakesLabel.setText(mistakes + " / 3");
+        if (mistakesLabel != null) mistakesLabel.setText(mistakes + " / " + MAX_MISTAKES);
     }
 
     private boolean checkBoardComplete() {
@@ -404,6 +612,120 @@ public class GameController {
             }
         }
         return true;
+    }
+
+    // ==================== TIMER ====================
+
+    private void startPlayTimer() {
+        playStartTime = System.currentTimeMillis();
+        playElapsedSeconds = 0;
+        playTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            playElapsedSeconds = (System.currentTimeMillis() - playStartTime) / 1000;
+            if (timerLabel != null) {
+                timerLabel.setText(formatTime(playElapsedSeconds));
+            }
+        }));
+        playTimer.setCycleCount(Timeline.INDEFINITE);
+        playTimer.play();
+    }
+
+    private void stopPlayTimer() {
+        if (playTimer != null) {
+            playTimer.stop();
+        }
+    }
+
+    private String formatTime(long totalSeconds) {
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    // ==================== IMPORT/EXPORT ====================
+
+    @FXML
+    private void onImport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Sudoku Puzzle");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Sudoku Files", "*.sudoku", "*.txt")
+        );
+        File file = fileChooser.showOpenDialog(sudokuBoard.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                int[][] grid = PuzzleIOService.readFromFile(file);
+                currentBoard = new Board(grid);
+                sudokuBoard.setBoard(grid);
+
+                // Tạo lại solution
+                solutionBoard = currentBoard.copy();
+                Solver solver = new BacktrackingSolver();
+                SolveResult result = solver.solve(solutionBoard);
+                if (result.isSolved()) {
+                    solutionBoard = result.getFinalBoard() != null ? result.getFinalBoard() : solutionBoard;
+                }
+
+                refreshSolver();
+                resetStats();
+                mistakes = 0;
+                hintsUsed = 0;
+                moveHistory.clear();
+                updatePlayStats();
+                startPlayTimer();
+                appendLog("Puzzle imported from: " + file.getName());
+            } catch (Exception ex) {
+                appendLog("❌ Failed to import: " + ex.getMessage());
+                showAlert("Import Error", "Failed to import puzzle: " + ex.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void onExport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Sudoku Puzzle");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Sudoku Files", "*.sudoku")
+        );
+        fileChooser.setInitialFileName("puzzle.sudoku");
+        File file = fileChooser.showSaveDialog(sudokuBoard.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                PuzzleIOService.writeToFile(file, sudokuBoard.getCurrentBoard());
+                appendLog("Puzzle exported to: " + file.getName());
+            } catch (Exception ex) {
+                appendLog("❌ Failed to export: " + ex.getMessage());
+                showAlert("Export Error", "Failed to export puzzle: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // ==================== HIGH SCORES ====================
+
+    private void showHighScores() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("🏆 HIGH SCORES 🏆\n\n");
+        for (Difficulty diff : Difficulty.values()) {
+            sb.append(diff.name()).append(": ")
+                    .append(highScoreManager.getHighScoreDisplay(diff))
+                    .append("\n");
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("High Scores");
+        alert.setHeaderText(null);
+        alert.setContentText(sb.toString());
+        alert.showAndWait();
     }
 
     // ==================== SOLVE MODE METHODS ====================
@@ -425,20 +747,70 @@ public class GameController {
 
     @FXML
     private void onRunComparison() {
+        // FIX: Hiển thị comparison lên màn hình đúng cách
         appendLog("Running algorithm comparison...");
-        appendLog("Backtracking: " + runSolverAndGetStats(new BacktrackingSolver(), currentBoard.copy()));
-        appendLog("MRV: " + runSolverAndGetStats(new MRVSolver(), currentBoard.copy()));
-        appendLog("Simulated Annealing: " + runSolverAndGetStats(new SASolver(), currentBoard.copy()));
-        appendLog("Comparison complete.");
-    }
 
-    private String runSolverAndGetStats(Solver solver, Board board) {
-        long start = System.nanoTime();
-        SolveResult result = solver.solve(board);
-        long end = System.nanoTime();
-        long timeMicros = (end - start) / 1000;
-        return String.format("Steps: %d, Backtracks: %d, Time: %d μs",
-                result.getSteps().size(), result.getBacktrackCount(), timeMicros);
+        boolean runBacktracking = cbBacktracking != null && cbBacktracking.isSelected();
+        boolean runMRV = cbMRV != null && cbMRV.isSelected();
+        boolean runSA = cbSA != null && cbSA.isSelected();
+
+        if (!runBacktracking && !runMRV && !runSA) {
+            appendLog("Please select at least one algorithm to compare.");
+            return;
+        }
+
+        AlgorithmComparison comparison = new AlgorithmComparison();
+        if (runBacktracking) {
+            comparison.addAlgorithm("Backtracking", new BacktrackingSolver());
+        }
+        if (runMRV) {
+            comparison.addAlgorithm("MRV", new MRVSolver());
+        }
+        if (runSA) {
+            comparison.addAlgorithm("Simulated Annealing", new SASolver());
+        }
+
+        List<AlgorithmStats> results = comparison.runComparison(currentBoard.copy());
+
+        // Hiển thị kết quả lên table
+        if (compareTable != null) {
+            compareTable.getItems().clear();
+            compareTable.getItems().addAll(results);
+        }
+
+        // Hiển thị bars
+        if (compareBars != null) {
+            compareBars.getChildren().clear();
+            double maxTime = results.stream().mapToDouble(AlgorithmStats::getTimeMs).max().orElse(1);
+
+            for (AlgorithmStats stat : results) {
+                HBox barRow = new HBox(10);
+                barRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                barRow.getStyleClass().add("compare-bar-row");
+
+                Label nameLabel = new Label(stat.getAlgorithmName());
+                nameLabel.getStyleClass().add("compare-bar-label");
+                nameLabel.setMinWidth(120);
+
+                ProgressBar bar = new ProgressBar(stat.getTimeMs() / maxTime);
+                bar.setPrefWidth(300);
+                bar.getStyleClass().add("compare-bar");
+                if (stat.isBest()) {
+                    bar.getStyleClass().add("compare-bar-best");
+                }
+
+                Label timeLabel = new Label(String.format("%.2f ms", stat.getTimeMs()));
+                timeLabel.getStyleClass().add("stats-value");
+
+                barRow.getChildren().addAll(nameLabel, bar, timeLabel);
+                compareBars.getChildren().add(barRow);
+            }
+        }
+
+        for (AlgorithmStats stat : results) {
+            appendLog(stat.getAlgorithmName() + ": " + stat.toString());
+        }
+        appendLog("Comparison complete.");
     }
 
     // ==================== ANIMATION CONTROL ====================
@@ -451,7 +823,10 @@ public class GameController {
         isPlaying.set(true);
         if (controlPanel != null) controlPanel.setButtonsEnabled(true);
         if (startTime == 0) startTime = System.currentTimeMillis();
-        updateAnimationSpeed();
+
+        double speed = controlPanel != null ? controlPanel.getSpeedSlider().getValue() : 0.3;
+        updateAnimationSpeed(speed);
+
         animationTimeline.play();
         appendLog("▶️ Animation started");
     }
@@ -463,12 +838,27 @@ public class GameController {
         appendLog("⏸️ Animation paused");
     }
 
-    private void updateAnimationSpeed() {
-        if (controlPanel == null) return;
-        double speed = controlPanel.getSpeedSlider().getValue();
+    /**
+     * FIX: Speed slider - cập nhật duration mà không recreate timeline
+     */
+    private void updateAnimationSpeed(double speed) {
+        // Chuyển đổi speed (0.01 - 2.0) thành duration phù hợp
+        // speed càng cao = duration càng thấp (chạy nhanh hơn)
         Duration duration = Duration.seconds(speed);
-        animationTimeline.getKeyFrames().clear();
-        animationTimeline.getKeyFrames().add(new KeyFrame(duration, e -> playNextStep()));
+
+        if (animationTimeline != null) {
+            animationTimeline.stop();
+            animationTimeline.getKeyFrames().clear();
+            animationTimeline.getKeyFrames().add(
+                    new KeyFrame(duration, e -> playNextStep())
+            );
+
+            if (isPlaying.get()) {
+                animationTimeline.play();
+            }
+        }
+
+        appendLog("Speed changed to " + speed + "s/step");
     }
 
     private void playNextStep() {
@@ -520,6 +910,7 @@ public class GameController {
             case TRY: return CellState.TRYING;
             case BACKTRACK: return CellState.BACKTRACK;
             case PLACE: return CellState.SOLVED;
+            case SOLVER_STEP: return CellState.SOLVED;
             default: return CellState.EMPTY;
         }
     }

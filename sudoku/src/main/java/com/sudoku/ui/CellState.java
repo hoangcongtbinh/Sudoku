@@ -1,11 +1,14 @@
 package com.sudoku.ui;
 
 public enum CellState {
-    GIVEN,      // Original puzzle numbers (cyan)
-    EMPTY,      // Empty cell (dark gray)
-    CURRENT,    // Currently being processed (amber glow)
-    TRYING,     // Trying a value (green)
-    BACKTRACK,  // Just backtracked (red flash)
-    SOLVED      // Correctly solved (green)
+    EMPTY,      // Ô trống
+    GIVEN,      // Ô cố định ban đầu
+    CURRENT,    // Ô đang được xử lý (solver)
+    TRYING,     // Ô đang thử (solver)
+    BACKTRACK,  // Ô bị backtrack (solver)
+    SOLVED,     // Ô đã giải xong (solver)
+    HINT,       // Ô hint (play mode)
+    USER_INPUT, // Ô người dùng nhập (play mode)
+    ERROR,      // Ô lỗi (trùng hàng/cột/cụm)
+    CHANGED     // Ô vừa thay đổi (highlight tạm thời)
 }
-

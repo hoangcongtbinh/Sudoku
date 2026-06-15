@@ -363,6 +363,7 @@
     .cyber-button-primary:hover {
         -fx-background-color: #0a2840;
         -fx-effect: dropshadow(gaussian, #00d4ff, 20, 0.45, 0, 0);
+        -fx-cursor: hand;
     }
     .cyber-button-primary:pressed {
         -fx-background-color: #0d2e48;

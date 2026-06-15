@@ -1,58 +1,51 @@
 package com.sudoku.benchmark;
 
+import javafx.beans.property.*;
+
 public class AlgorithmStats {
-    private final String algorithmName;
-    private final boolean solved;
-    private final long elapsedTimeNanos;
-    private final int stepCount;
-    private final int initialEmptyCells;
-    private final String errorMessage;
+    private final StringProperty algorithmName;
+    private final IntegerProperty steps;
+    private final IntegerProperty backtracks;
+    private final DoubleProperty timeMs;
+    private final BooleanProperty best;
+    private final BooleanProperty solved;
 
-    public AlgorithmStats(
-            String algorithmName,
-            boolean solved,
-            long elapsedTimeNanos,
-            int stepCount,
-            int initialEmptyCells,
-            String errorMessage
-    ) {
-        this.algorithmName = algorithmName;
-        this.solved = solved;
-        this.elapsedTimeNanos = elapsedTimeNanos;
-        this.stepCount = stepCount;
-        this.initialEmptyCells = initialEmptyCells;
-        this.errorMessage = errorMessage;
+    public AlgorithmStats(String algorithmName, int steps, int backtracks, double timeMs, boolean solved) {
+        this.algorithmName = new SimpleStringProperty(algorithmName);
+        this.steps = new SimpleIntegerProperty(steps);
+        this.backtracks = new SimpleIntegerProperty(backtracks);
+        this.timeMs = new SimpleDoubleProperty(timeMs);
+        this.best = new SimpleBooleanProperty(false);
+        this.solved = new SimpleBooleanProperty(solved);
     }
 
-    public String getAlgorithmName() {
-        return algorithmName;
-    }
+    public String getAlgorithmName() { return algorithmName.get(); }
+    public void setAlgorithmName(String name) { algorithmName.set(name); }
+    public StringProperty algorithmNameProperty() { return algorithmName; }
 
-    public boolean isSolved() {
-        return solved;
-    }
+    public int getSteps() { return steps.get(); }
+    public void setSteps(int steps) { this.steps.set(steps); }
+    public IntegerProperty stepsProperty() { return steps; }
 
-    public long getElapsedTimeNanos() {
-        return elapsedTimeNanos;
-    }
+    public int getBacktracks() { return backtracks.get(); }
+    public void setBacktracks(int backtracks) { this.backtracks.set(backtracks); }
+    public IntegerProperty backtracksProperty() { return backtracks; }
 
-    public double getElapsedTimeMillis() {
-        return elapsedTimeNanos / 1_000_000.0;
-    }
+    public double getTimeMs() { return timeMs.get(); }
+    public void setTimeMs(double timeMs) { this.timeMs.set(timeMs); }
+    public DoubleProperty timeMsProperty() { return timeMs; }
 
-    public int getStepCount() {
-        return stepCount;
-    }
+    public boolean isBest() { return best.get(); }
+    public void setBest(boolean best) { this.best.set(best); }
+    public BooleanProperty bestProperty() { return best; }
 
-    public int getInitialEmptyCells() {
-        return initialEmptyCells;
-    }
+    public boolean isSolved() { return solved.get(); }
+    public void setSolved(boolean solved) { this.solved.set(solved); }
+    public BooleanProperty solvedProperty() { return solved; }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public boolean hasError() {
-        return errorMessage != null && !errorMessage.isBlank();
+    @Override
+    public String toString() {
+        return String.format("Steps: %d, Backtracks: %d, Time: %.2f ms, Solved: %s",
+                getSteps(), getBacktracks(), getTimeMs(), isSolved() ? "Yes" : "No");
     }
 }

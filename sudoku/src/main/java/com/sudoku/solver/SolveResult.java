@@ -1,63 +1,39 @@
 package com.sudoku.solver;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import com.sudoku.model.Board;
+import com.sudoku.model.Step;
+
 import java.util.List;
-import com.sudoku.model.*;
 
 public class SolveResult {
     private boolean solved;
     private List<Step> steps;
-    private long timeToSolve;
+    private long durationNanos;
+    private Board finalBoard;
+    private int backtrackCount;
 
-    // Constructor chung
-    public SolveResult(boolean solved, List<Step> steps, long timeToSolve) {
+    public SolveResult(boolean solved, List<Step> steps, long durationNanos) {
         this.solved = solved;
-        this.steps = steps == null ? List.of() : List.copyOf(steps);
-        this.timeToSolve = timeToSolve;
-    }
-
-    // Tìm ra được lời giải
-    public static SolveResult solved(List<Step> steps, long timeToSolve) {
-        // Kiểm tra liệu có tồn tại bước giải không
-        if (steps == null || steps.isEmpty()) {
-            throw new IllegalArgumentException("Solved result must contain steps");
+        this.steps = steps;
+        this.durationNanos = durationNanos;
+        this.backtrackCount = 0;
+        for (Step s : steps) {
+            if (s.isBacktrack()) backtrackCount++;
         }
-        return new SolveResult(true, steps, timeToSolve);
     }
 
-    // Bảng đã được giải thành công trước đó
-    public static SolveResult alreadySolved() {
-        return new SolveResult(true, null, 0);
+    public SolveResult(boolean solved, List<Step> steps, long durationNanos, Board finalBoard) {
+        this(solved, steps, durationNanos);
+        this.finalBoard = finalBoard;
     }
 
-    // Không có lời giải
     public static SolveResult noSolution() {
-        return new SolveResult(false, null, 0);
+        return new SolveResult(false, java.util.Collections.emptyList(), 0);
     }
 
-    public boolean isSolved() {
-        return solved;
-    }
-
-    public List<Step> getSteps() {
-        return steps;
-    }
-
-    public long getTimeToSolve() {
-        return timeToSolve;
-    }
-
-    public int getBacktrackCount() {
-        if (steps == null) {
-            return 0;
-        }
-        int count = 0;
-        for (Step step : steps) {
-            if (step.isBacktrack()) {
-                count++;
-            }
-        }
-        return count;
-    }
+    public boolean isSolved() { return solved; }
+    public List<Step> getSteps() { return steps; }
+    public long getDurationNanos() { return durationNanos; }
+    public Board getFinalBoard() { return finalBoard; }
+    public int getBacktrackCount() { return backtrackCount; }
 }

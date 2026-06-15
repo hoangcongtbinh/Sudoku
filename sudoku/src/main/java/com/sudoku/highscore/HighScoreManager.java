@@ -6,7 +6,7 @@ import com.sudoku.model.GameSession;
 import java.io.*;
 import java.util.Properties;
 
-public class HighScoreManager {
+public class    HighScoreManager {
 
     private static final String DEFAULT_FILE_PATH =
             System.getProperty("user.home") + File.separator + "sudoku_highscores.properties";
