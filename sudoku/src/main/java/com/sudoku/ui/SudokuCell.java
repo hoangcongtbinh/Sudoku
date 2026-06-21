@@ -1,13 +1,12 @@
 package com.sudoku.ui;
 
-import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
 
 public class SudokuCell extends StackPane {
@@ -33,10 +32,10 @@ public class SudokuCell extends StackPane {
         this.isChanged = false;
 
         numberLabel = new Label("");
-        numberLabel.setFont(Font.font("Monospaced", 20));
+        numberLabel.setFont(Font.font("Consolas", FontWeight.BOLD, 20));
         getChildren().add(numberLabel);
         setAlignment(Pos.CENTER);
-        setPrefSize(60, 60);
+        setPrefSize(52, 52);
         getStyleClass().add("sudoku-cell");
 
         updateStyle();
@@ -76,8 +75,11 @@ public class SudokuCell extends StackPane {
     }
 
     public void setError(boolean error) {
-        this.hasError = error;
-        updateStyle();
+        // FIX: Chỉ update nếu thay đổi thực sự, tránh gọi updateStyle() liên tục
+        if (this.hasError != error) {
+            this.hasError = error;
+            updateStyle();
+        }
     }
 
     public boolean hasError() {
@@ -85,64 +87,91 @@ public class SudokuCell extends StackPane {
     }
 
     /**
-     * Đánh dấu ô vừa thay đổi - highlight tạm thời rồi tự tắt
+     * FIX: Flash highlight dùng background color thay vì opacity
+     * Tránh conflict với CSS và giảm tải UI thread
      */
     public void flashChanged() {
-        this.isChanged = true;
-        updateStyle();
-
         // Hủy timeline cũ nếu có
         if (changeTimeline != null) {
             changeTimeline.stop();
         }
 
-        // Tạo timeline mới: highlight trong 500ms rồi fade out trong 500ms
+        this.isChanged = true;
+        updateStyle();
+
+        // FIX: Dùng PauseTransition đơn giản thay vì Timeline phức tạp
+        // Tắt highlight sau 500ms
         changeTimeline = new Timeline(
-                new KeyFrame(Duration.ZERO, new KeyValue(opacityProperty(), 1.0)),
                 new KeyFrame(Duration.millis(500), e -> {
                     this.isChanged = false;
                     updateStyle();
-                }),
-                new KeyFrame(Duration.millis(1000), new KeyValue(opacityProperty(), 1.0))
+                })
         );
-        changeTimeline.setOnFinished(e -> {
-            this.isChanged = false;
-            updateStyle();
-        });
+        changeTimeline.setCycleCount(1);
         changeTimeline.play();
     }
 
     public int getRow() { return row; }
     public int getCol() { return col; }
 
+    /**
+     * Cập nhật style class theo priority:
+     * ERROR (đỏ) > CHANGED (flash xanh) > HINT (cam) > FIXED (xám đậm)
+     * GIVEN (đen đậm) vs USER_INPUT (xanh)
+     */
     private void updateStyle() {
         getStyleClass().removeAll(
                 "given", "empty", "current", "trying", "backtrack",
-                "solved", "highlighted", "fixed", "error", "changed", "user-input", "hint"
+                "solved", "highlighted", "fixed", "error", "changed",
+                "user-input", "hint"
         );
 
+        // Base state
         switch (state) {
-            case GIVEN:    getStyleClass().add("given"); break;
-            case EMPTY:    getStyleClass().add("empty"); break;
-            case CURRENT:  getStyleClass().add("current"); break;
-            case TRYING:   getStyleClass().add("trying"); break;
-            case BACKTRACK:getStyleClass().add("backtrack"); break;
-            case SOLVED:   getStyleClass().add("solved"); break;
-            case HINT:     getStyleClass().add("hint"); break;
-            case USER_INPUT: getStyleClass().add("user-input"); break;
-            case ERROR:    getStyleClass().add("error"); break;
-            case CHANGED:  getStyleClass().add("changed"); break;
+            case GIVEN:
+                getStyleClass().add("given");
+                break;
+            case EMPTY:
+                getStyleClass().add("empty");
+                break;
+            case CURRENT:
+                getStyleClass().add("current");
+                break;
+            case TRYING:
+                getStyleClass().add("trying");
+                break;
+            case BACKTRACK:
+                getStyleClass().add("backtrack");
+                break;
+            case SOLVED:
+                getStyleClass().add("solved");
+                break;
+            case HINT:
+                getStyleClass().add("hint");
+                break;
+            case USER_INPUT:
+                getStyleClass().add("user-input");
+                break;
+            case ERROR:
+                getStyleClass().add("error");
+                break;
+            case CHANGED:
+                getStyleClass().add("changed");
+                break;
         }
 
-        // Ưu tiên: error > changed > fixed > highlighted
+        // Priority override: error > changed > hint > fixed
         if (hasError) {
             getStyleClass().add("error");
         } else if (isChanged) {
             getStyleClass().add("changed");
-        } else if (isFixed && state != CellState.GIVEN) {
+        } else if (state == CellState.HINT) {
+            getStyleClass().add("hint");
+        } else if (isFixed) {
             getStyleClass().add("fixed");
         }
 
+        // Highlight border (không override màu nền của error/changed)
         if (highlighted && !hasError && !isChanged) {
             getStyleClass().add("highlighted");
         }

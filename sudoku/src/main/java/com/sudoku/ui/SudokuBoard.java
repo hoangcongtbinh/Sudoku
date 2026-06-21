@@ -1,5 +1,6 @@
 package com.sudoku.ui;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 
@@ -24,8 +25,9 @@ public class SudokuBoard extends GridPane {
         originalBoard = new int[9][9];
 
         setAlignment(Pos.CENTER);
-        setHgap(0.5);
-        setVgap(0.5);
+        setHgap(1);
+        setVgap(1);
+        setPadding(new Insets(2));
         getStyleClass().add("sudoku-board");
 
         initializeCells();
@@ -43,17 +45,22 @@ public class SudokuBoard extends GridPane {
                         onCellClickedListener.onCellClicked(r, c);
                     }
                     highlightCell(r, c);
+                    cell.requestFocus();
                 });
 
                 cells[row][col] = cell;
                 add(cell, col, row);
 
-                // Viền dày giữa các khối 3x3
-                if ((col + 1) % 3 == 0 && col != 8) {
-                    cell.getStyleClass().add("right-thick-border");
-                }
-                if ((row + 1) % 3 == 0 && row != 8) {
-                    cell.getStyleClass().add("bottom-thick-border");
+                // Viền dày phân cách các khối 3x3
+                boolean isRightBlockEdge = (col + 1) % 3 == 0 && col != 8;
+                boolean isBottomBlockEdge = (row + 1) % 3 == 0 && row != 8;
+
+                if (isRightBlockEdge && isBottomBlockEdge) {
+                    cell.getStyleClass().add("border-right-bottom");
+                } else if (isRightBlockEdge) {
+                    cell.getStyleClass().add("border-right");
+                } else if (isBottomBlockEdge) {
+                    cell.getStyleClass().add("border-bottom");
                 }
             }
         }
@@ -78,15 +85,31 @@ public class SudokuBoard extends GridPane {
         }
     }
 
+    /**
+     * FIX: Chỉ flash khi giá trị THỰC SỰ thay đổi
+     * Tránh gọi animation khi validateBoard reset lỗi
+     */
     public void updateCell(int row, int col, int value, CellState state) {
-        board[row][col] = value;
-        cells[row][col].setValue(value);
-        cells[row][col].setState(state);
+        SudokuCell cell = cells[row][col];
+        int oldValue = cell.getValue();
+        CellState oldState = cell.getState();
 
-        // Flash highlight khi ô thay đổi
-        if (state == CellState.SOLVED || state == CellState.USER_INPUT ||
-                state == CellState.TRYING || state == CellState.BACKTRACK) {
-            cells[row][col].flashChanged();
+        board[row][col] = value;
+        cell.setValue(value);
+        cell.setState(state);
+
+        // FIX: Chỉ flash khi giá trị hoặc state thực sự thay đổi
+        // VÀ không phải là EMPTY (tránh flash khi erase)
+        boolean valueChanged = oldValue != value;
+        boolean stateChanged = oldState != state;
+        boolean isSignificant = state == CellState.SOLVED ||
+                state == CellState.USER_INPUT ||
+                state == CellState.HINT ||
+                state == CellState.TRYING ||
+                state == CellState.BACKTRACK;
+
+        if ((valueChanged || stateChanged) && isSignificant) {
+            cell.flashChanged();
         }
     }
 
@@ -102,18 +125,15 @@ public class SudokuBoard extends GridPane {
     }
 
     /**
-     * Kiểm tra và đánh dấu lỗi cho tất cả các ô
-     * Trả về true nếu có lỗi
+     * Kiểm tra và đánh dấu lỗi cho tất cả các ô.
+     * Trả về true nếu có ít nhất một lỗi.
+     * FIX: Tối ưu - chỉ gọi setError khi thực sự cần
      */
     public boolean validateBoard() {
         boolean hasAnyError = false;
 
-        // Reset lỗi cũ
-        for (int r = 0; r < 9; r++) {
-            for (int c = 0; c < 9; c++) {
-                cells[r][c].setError(false);
-            }
-        }
+        // Reset lỗi cũ - dùng mảng tạm để tránh gọi updateStyle nhiều lần
+        boolean[][] newErrors = new boolean[9][9];
 
         // Kiểm tra từng ô
         for (int r = 0; r < 9; r++) {
@@ -124,8 +144,8 @@ public class SudokuBoard extends GridPane {
                 // Kiểm tra trùng hàng
                 for (int cc = 0; cc < 9; cc++) {
                     if (cc != c && cells[r][cc].getValue() == val) {
-                        cells[r][c].setError(true);
-                        cells[r][cc].setError(true);
+                        newErrors[r][c] = true;
+                        newErrors[r][cc] = true;
                         hasAnyError = true;
                     }
                 }
@@ -133,8 +153,8 @@ public class SudokuBoard extends GridPane {
                 // Kiểm tra trùng cột
                 for (int rr = 0; rr < 9; rr++) {
                     if (rr != r && cells[rr][c].getValue() == val) {
-                        cells[r][c].setError(true);
-                        cells[rr][c].setError(true);
+                        newErrors[r][c] = true;
+                        newErrors[rr][c] = true;
                         hasAnyError = true;
                     }
                 }
@@ -145,12 +165,19 @@ public class SudokuBoard extends GridPane {
                 for (int rr = boxRow; rr < boxRow + 3; rr++) {
                     for (int cc = boxCol; cc < boxCol + 3; cc++) {
                         if ((rr != r || cc != c) && cells[rr][cc].getValue() == val) {
-                            cells[r][c].setError(true);
-                            cells[rr][cc].setError(true);
+                            newErrors[r][c] = true;
+                            newErrors[rr][cc] = true;
                             hasAnyError = true;
                         }
                     }
                 }
+            }
+        }
+
+        // Áp dụng lỗi một lần
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                cells[r][c].setError(newErrors[r][c]);
             }
         }
 
@@ -177,5 +204,13 @@ public class SudokuBoard extends GridPane {
 
     public boolean isFixedCell(int row, int col) {
         return cells[row][col].isFixed();
+    }
+
+    public int[][] getOriginalGrid() {
+        int[][] result = new int[9][9];
+        for (int r = 0; r < 9; r++) {
+            System.arraycopy(originalBoard[r], 0, result[r], 0, 9);
+        }
+        return result;
     }
 }

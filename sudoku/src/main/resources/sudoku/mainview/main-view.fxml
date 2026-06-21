@@ -95,27 +95,27 @@
                 <VBox spacing="5" styleClass="control-section">
                     <Label text="INPUT" styleClass="section-label"/>
                     <HBox spacing="5">
-                        <Button fx:id="numBtn1" text="1" styleClass="num-btn" onAction="#onNum1"
+                        <Button text="1" styleClass="num-btn" onAction="#onNum1"
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                        <Button fx:id="numBtn2" text="2" styleClass="num-btn" onAction="#onNum2"
+                        <Button text="2" styleClass="num-btn" onAction="#onNum2"
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                        <Button fx:id="numBtn3" text="3" styleClass="num-btn" onAction="#onNum3"
-                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                    </HBox>
-                    <HBox spacing="5">
-                        <Button fx:id="numBtn4" text="4" styleClass="num-btn" onAction="#onNum4"
-                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                        <Button fx:id="numBtn5" text="5" styleClass="num-btn" onAction="#onNum5"
-                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                        <Button fx:id="numBtn6" text="6" styleClass="num-btn" onAction="#onNum6"
+                        <Button text="3" styleClass="num-btn" onAction="#onNum3"
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
                     </HBox>
                     <HBox spacing="5">
-                        <Button fx:id="numBtn7" text="7" styleClass="num-btn" onAction="#onNum7"
+                        <Button text="4" styleClass="num-btn" onAction="#onNum4"
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                        <Button fx:id="numBtn8" text="8" styleClass="num-btn" onAction="#onNum8"
+                        <Button text="5" styleClass="num-btn" onAction="#onNum5"
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-                        <Button fx:id="numBtn9" text="9" styleClass="num-btn" onAction="#onNum9"
+                        <Button text="6" styleClass="num-btn" onAction="#onNum6"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                    </HBox>
+                    <HBox spacing="5">
+                        <Button text="7" styleClass="num-btn" onAction="#onNum7"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button text="8" styleClass="num-btn" onAction="#onNum8"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                        <Button text="9" styleClass="num-btn" onAction="#onNum9"
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
                     </HBox>
                     <Button text="✕  ERASE"
@@ -143,6 +143,30 @@
                             maxWidth="1.7976931348623157E308"
                             onAction="#onCheck"/>
                 </VBox>
+
+                <Separator styleClass="neon-divider"/>
+
+                <!-- FIX: Import/Export buttons -->
+                <VBox spacing="6" styleClass="control-section">
+                    <Label text="FILE" styleClass="section-label"/>
+                    <HBox spacing="6">
+                        <Button text="IMPORT" fx:id="importButton" styleClass="cyber-button"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                onAction="#onImport"/>
+                        <Button text="EXPORT" fx:id="exportButton" styleClass="cyber-button"
+                                HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                onAction="#onExport"/>
+                    </HBox>
+                </VBox>
+
+                <Separator styleClass="neon-divider"/>
+
+                <!-- FIX: High Score button -->
+                <Button text="🏆 HIGH SCORES"
+                        fx:id="highScoreButton"
+                        styleClass="cyber-button-primary"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#showHighScores"/>
 
                 <Separator styleClass="neon-divider"/>
 
@@ -238,19 +262,10 @@
 
                 <VBox spacing="5" VBox.vgrow="ALWAYS">
                     <Label text="RESULTS" styleClass="section-label"/>
+                    <!-- FIX: Removed static columns, GameController creates them programmatically -->
                     <TableView fx:id="compareTable"
                                styleClass="compare-table"
                                VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn fx:id="colAlgo"  text="ALGORITHM" prefWidth="95"
-                                         resizable="false" sortable="false"/>
-                            <TableColumn fx:id="colSteps" text="STEPS"     prefWidth="50"
-                                         resizable="false" sortable="false"/>
-                            <TableColumn fx:id="colBt"    text="BT"        prefWidth="35"
-                                         resizable="false" sortable="false"/>
-                            <TableColumn fx:id="colTime"  text="ms"        prefWidth="53"
-                                         resizable="false" sortable="false"/>
-                        </columns>
                         <placeholder>
                             <Label text="Run comparison to see results"
                                    styleClass="table-placeholder"/>

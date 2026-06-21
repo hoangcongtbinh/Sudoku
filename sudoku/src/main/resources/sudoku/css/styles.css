@@ -627,3 +627,209 @@
         -fx-alignment: CENTER;
     }
     .cell-input:focused { -fx-background-color: transparent; -fx-border-color: transparent; }
+
+
+/* ================================================================
+   ADDITIONAL CLASSES — mapped from GameController.java
+   (Neon theme equivalents for classes used in Java code)
+   ================================================================ */
+
+/* ── 3×3 BLOCK BORDERS (GameController uses .border-right/.border-bottom) ── */
+.border-right {
+    -fx-border-width: 0.5 2.5 0.5 0.5;
+    -fx-border-color: #1a2535 #1e4268 #1a2535 #1a2535;
+}
+.border-bottom {
+    -fx-border-width: 0.5 0.5 2.5 0.5;
+    -fx-border-color: #1a2535 #1a2535 #1e4268 #1a2535;
+}
+.border-right-bottom {
+    -fx-border-width: 0.5 2.5 2.5 0.5;
+    -fx-border-color: #1a2535 #1e4268 #1e4268 #1a2535;
+}
+
+/* ── CELL STATE: empty (GameController uses .sudoku-cell.empty) ── */
+.sudoku-cell.empty {
+    -fx-background-color: #0b1525;
+    -fx-text-fill: #3a5070;
+}
+.sudoku-cell.empty .label {
+    -fx-text-fill: #3a5070;
+    -fx-background-color: transparent;
+}
+
+/* ── CELL STATE: fixed (GameController uses .sudoku-cell.fixed) ── */
+/* Maps to cell-given in neon theme */
+.sudoku-cell.fixed {
+    -fx-background-color: #0a1830;
+    -fx-text-fill: #4488ff;
+}
+.sudoku-cell.fixed .label {
+    -fx-text-fill: #4488ff;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #4488ff, 9, 0.4, 0, 0);
+}
+
+/* ── CELL STATE: user-input (GameController uses .sudoku-cell.user-input) ── */
+/* Maps to cell-user in neon theme */
+.sudoku-cell.user-input {
+    -fx-background-color: #0b1525;
+    -fx-text-fill: #d0e8f8;
+}
+.sudoku-cell.user-input .label {
+    -fx-text-fill: #d0e8f8;
+    -fx-background-color: transparent;
+}
+
+/* ── CELL STATE: highlighted (GameController uses .sudoku-cell.highlighted) ── */
+/* Maps to cell-selected in neon theme */
+.sudoku-cell.highlighted {
+    -fx-background-color: #0d1e38;
+    -fx-border-color: #00d4ff;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #00d4ff;
+}
+.sudoku-cell.highlighted .label {
+    -fx-text-fill: #00d4ff;
+    -fx-background-color: transparent;
+}
+
+/* ── CELL STATE: changed (GameController uses .sudoku-cell.changed) ── */
+/* Flash effect — cyan pulse, similar to neon glow */
+.sudoku-cell.changed {
+    -fx-background-color: #0a2840;
+    -fx-border-color: #00d4ff;
+    -fx-border-width: 2;
+    -fx-text-fill: #00d4ff;
+}
+.sudoku-cell.changed .label {
+    -fx-text-fill: #00d4ff;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 12, 0.5, 0, 0);
+}
+
+/* ── CELL STATE: current (GameController uses .sudoku-cell.current) ── */
+.sudoku-cell.current {
+    -fx-background-color: #0d1e30;
+    -fx-border-color: #ffaa00;
+    -fx-border-width: 1;
+    -fx-text-fill: #ffaa00;
+}
+.sudoku-cell.current .label {
+    -fx-text-fill: #ffaa00;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #ffaa00, 16, 0.65, 0, 0);
+}
+
+/* ── CELL STATE: trying (GameController uses .sudoku-cell.trying) ── */
+/* Maps to cell-solving in neon theme */
+.sudoku-cell.trying {
+    -fx-background-color: #181000;
+    -fx-border-color: #ffaa00;
+    -fx-border-width: 1;
+    -fx-text-fill: #ffaa00;
+}
+.sudoku-cell.trying .label {
+    -fx-text-fill: #ffaa00;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #ffaa00, 16, 0.65, 0, 0);
+}
+
+/* ── STATS PANEL EXTRAS (GameController uses .stats-title, .stat-label) ── */
+.stats-title {
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 8 0;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.3, 0, 0);
+}
+.stat-label {
+    -fx-text-fill: #4a6480;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+}
+
+/* ── FILLED PROGRESS BAR (GameController uses .filled-progress) ── */
+.filled-progress {
+    -fx-accent: #00ff88;
+}
+.filled-progress .track {
+    -fx-background-color: #1a2535;
+    -fx-background-radius: 1;
+}
+.filled-progress .bar {
+    -fx-background-color: #00ff88;
+    -fx-background-radius: 1;
+    -fx-effect: dropshadow(gaussian, #00ff88, 4, 0.3, 0, 0);
+}
+
+/* ── MODE TAB INACTIVE (GameController uses .mode-tab-inactive) ── */
+.mode-tab-inactive {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-text-fill: #3a5570;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 9 22 9 22;
+    -fx-cursor: hand;
+}
+.mode-tab-inactive:hover {
+    -fx-background-color: #0d1525;
+    -fx-text-fill: #6080a0;
+}
+
+/* ── HIGH SCORE DIALOG (GameController uses .high-score-dialog) ── */
+.high-score-dialog {
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+}
+.high-score-dialog .content {
+    -fx-text-fill: #d0e8f8;
+    -fx-background-color: #0d1117;
+}
+
+/* ── ALERT DIALOG STYLING (for showAlert, showHighScores) ── */
+.dialog-pane {
+    -fx-background-color: #0d1117;
+    -fx-border-color: #1e3050;
+    -fx-border-width: 1;
+}
+.dialog-pane .header-panel {
+    -fx-background-color: #0a0d14;
+    -fx-border-color: transparent transparent #1a2535 transparent;
+    -fx-border-width: 1;
+}
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.dialog-pane .content {
+    -fx-text-fill: #d0e8f8;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 12px;
+}
+.dialog-pane .button-bar .button {
+    -fx-background-color: #08111e;
+    -fx-border-color: #1e3a60;
+    -fx-border-width: 1;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-text-fill: #00d4ff;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+.dialog-pane .button-bar .button:hover {
+    -fx-background-color: #0a1e32;
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 12, 0.3, 0, 0);
+}
