@@ -14,20 +14,31 @@
 </div>
 
 ---
-
 ## 📸 Giao diện ứng dụng
 
-| 🎮 PLAY Mode |
-| :---: |
-| <img src="play.png" width="750" alt="Play Mode"><br><sub>*Chơi trực tiếp, nhập số, gợi ý, theo dõi tiến độ*</sub> |
+<details>
+  <summary><b>▶️ PLAY Mode (Click để mở rộng)</b></summary>
+  <p align="center">
+    <img src="play.png" width="800"><br>
+    <i>Chơi trực tiếp, nhập số, gợi ý, theo dõi tiến độ</i>
+  </p>
+</details>
 
-| 🔍 SOLVE Mode |
-| :---: |
-| <img src="solve.png" width="750" alt="Solve Mode"><br><sub>*Trực quan hóa từng bước giải với thống kê realtime*</sub> |
+<details>
+  <summary><b>🔍 SOLVE Mode (Click để mở rộng)</b></summary>
+  <p align="center">
+    <img src="solve.png" width="800"><br>
+    <i>Trực quan hóa từng bước giải với thống kê realtime</i>
+  </p>
+</details>
 
-| 📊 COMPARE Mode |
-| :---: |
-| <img src="compare.png" width="750" alt="Compare Mode"><br><sub>*So sánh hiệu năng 3 thuật toán trên cùng một bàn cờ*</sub> |
+<details>
+  <summary><b>📊 COMPARE Mode (Click để mở rộng)</b></summary>
+  <p align="center">
+    <img src="compare.png" width="800"><br>
+    <i>So sánh hiệu năng 3 thuật toán trên cùng một bàn cờ</i>
+  </p>
+</details>
 
 </div>
 
