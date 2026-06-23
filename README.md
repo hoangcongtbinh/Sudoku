@@ -1,4 +1,4 @@
-# 🧩 AIT2004 - Nhóm 7 - Sudoku
+# 🧩 AIT2004 - Sudoku
 
 <div align="center">
 
