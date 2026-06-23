@@ -44,10 +44,10 @@ public class ControlPanel extends VBox {
         speedLabel = new Label("Speed:");
         speedLabel.getStyleClass().add("speed-label");
 
-        speedSlider = new Slider(0.1, 1.0, 0.3);
+        speedSlider = new Slider(0.5, 3, 0.5);
         speedSlider.setShowTickLabels(true);
         speedSlider.setShowTickMarks(true);
-        speedSlider.setMajorTickUnit(0.3);
+        speedSlider.setMajorTickUnit(0.5);
         speedSlider.setBlockIncrement(0.1);
         speedSlider.setPrefWidth(200);
         speedSlider.getStyleClass().add("speed-slider");

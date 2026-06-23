@@ -245,7 +245,7 @@
     .num-erase-btn {
         -fx-background-color: #0f0508;
         -fx-border-color: #3a1020;
-        -fx-text-fill: #883344;
+        -fx-text-fill: #ff3355;
         -fx-font-size: 11px;
         -fx-min-height: 34px;
     }
@@ -733,6 +733,63 @@
     -fx-text-fill: #ffaa00;
     -fx-background-color: transparent;
     -fx-effect: dropshadow(gaussian, #ffaa00, 16, 0.65, 0, 0);
+}
+
+/* ── CELL STATE: solved (GameController/SudokuCell uses .sudoku-cell.solved) ── */
+.sudoku-cell.solved {
+    -fx-background-color: #041810;
+    -fx-text-fill: #00ff88;
+}
+.sudoku-cell.solved .label {
+    -fx-text-fill: #00ff88;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #00ff88, 12, 0.5, 0, 0);
+}
+
+/* ── CELL STATE: backtrack (GameController/SudokuCell uses .sudoku-cell.backtrack) ── */
+.sudoku-cell.backtrack {
+    -fx-background-color: #180508;
+    -fx-border-color: #ff3355;
+    -fx-border-width: 1;
+    -fx-text-fill: #ff3355;
+}
+.sudoku-cell.backtrack .label {
+    -fx-text-fill: #ff3355;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #ff3355, 16, 0.65, 0, 0);
+}
+
+/* ── CELL STATE: error (GameController/SudokuCell uses .sudoku-cell.error) ── */
+.sudoku-cell.error {
+    -fx-background-color: #160407;
+    -fx-text-fill: #cc2244;
+}
+.sudoku-cell.error .label {
+    -fx-text-fill: #cc2244;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #cc2244, 10, 0.4, 0, 0);
+}
+
+/* ── CELL STATE: hint (GameController/SudokuCell uses .sudoku-cell.hint) ── */
+.sudoku-cell.hint {
+    -fx-background-color: #0d1a08;
+    -fx-text-fill: #88ff44;
+}
+.sudoku-cell.hint .label {
+    -fx-text-fill: #88ff44;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #88ff44, 8, 0.35, 0, 0);
+}
+
+/* ── CELL STATE: given (GameController/SudokuCell uses .sudoku-cell.given) ── */
+.sudoku-cell.given {
+    -fx-background-color: #0a1830;
+    -fx-text-fill: #4488ff;
+}
+.sudoku-cell.given .label {
+    -fx-text-fill: #4488ff;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, #4488ff, 9, 0.4, 0, 0);
 }
 
 /* ── STATS PANEL EXTRAS (GameController uses .stats-title, .stat-label) ── */

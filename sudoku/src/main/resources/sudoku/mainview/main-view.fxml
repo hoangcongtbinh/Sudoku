@@ -89,10 +89,16 @@
                         maxWidth="1.7976931348623157E308"
                         onAction="#onNewGame"/>
 
+                <Button text="RESTART"
+                        fx:id="restartButton"
+                        styleClass="num-btn,num-erase-btn"
+                        maxWidth="1.7976931348623157E308"
+                        onAction="#onRestart"/>
+
                 <Separator styleClass="neon-divider"/>
 
                 <!-- Number pad 3×3 + erase -->
-                <VBox spacing="5" styleClass="control-section">
+                <VBox spacing="5" styleClass="control-section" fx:id="inputVbox">
                     <Label text="INPUT" styleClass="section-label"/>
                     <HBox spacing="5">
                         <Button text="1" styleClass="num-btn" onAction="#onNum1"
@@ -119,6 +125,7 @@
                                 HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
                     </HBox>
                     <Button text="✕  ERASE"
+                            fx:id="eraseButton"
                             styleClass="num-btn,num-erase-btn"
                             onAction="#onErase"
                             maxWidth="1.7976931348623157E308"/>
@@ -127,7 +134,7 @@
                 <Separator styleClass="neon-divider"/>
 
                 <!-- Action buttons -->
-                <VBox spacing="6" styleClass="control-section">
+                <VBox spacing="6" styleClass="control-section" fx:id="actionVbox">
                     <Label text="ACTIONS" styleClass="section-label"/>
                     <HBox spacing="6">
                         <Button text="HINT" fx:id="hintButton" styleClass="cyber-button"
@@ -216,7 +223,7 @@
                         onAction="#onSolve"/>
                 <Button text="RESET BOARD"
                         fx:id="resetButton"
-                        styleClass="cyber-button-danger"
+                        styleClass="num-btn,num-erase-btn"
                         maxWidth="1.7976931348623157E308"
                         onAction="#onReset"/>
 

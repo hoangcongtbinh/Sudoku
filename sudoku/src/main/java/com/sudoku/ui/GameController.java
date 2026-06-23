@@ -4,7 +4,6 @@ import com.sudoku.generator.BoardGenerator;
 import com.sudoku.highscore.HighScoreManager;
 import com.sudoku.io.PuzzleIOService;
 import com.sudoku.model.*;
-import com.sudoku.validator.BoardValidator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -50,12 +49,17 @@ public class GameController {
     @FXML private Button undoButton;
     @FXML private Button checkButton;
     @FXML private Button solveButton;
-    @FXML private Button resetButton;
+    @FXML private Button resetButton; // For Solver Page
+    @FXML private Button eraseButton;
+    @FXML private Button restartButton; // For Play Page
     @FXML private Button importButton;
     @FXML private Button exportButton;
     @FXML private Button highScoreButton;
     private Stack<PlayMove> moveHistory;
 
+    // Button Group
+    @FXML private VBox inputVbox;
+    @FXML private VBox actionVbox;
     // Compare mode components
     @FXML private CheckBox cbBacktracking;
     @FXML private CheckBox cbMRV;
@@ -111,9 +115,11 @@ public class GameController {
         setupCellSelection();
         setupKeyboardInput();
         setupCompareTable();  // FIX: Khởi tạo bảng comparison
-        newGame();
+        // newGame();
         attachEventHandlers();
-
+        handleLock();
+        exportButton.setDisable(true);
+        restartButton.setDisable(true);
         showPlayMode();
     }
 
@@ -347,6 +353,7 @@ public class GameController {
     private void onNewGame() {
         stopAnimation();
         stopPlayTimer();
+        handleUnlock();
         gameOver = false;
         mistakes = 0;
         hintsUsed = 0;
@@ -413,6 +420,7 @@ public class GameController {
 
     private void resetToOriginal() {
         stopAnimation();
+        handleUnlock();
         sudokuBoard.setBoard(currentBoard.getOriginalGrid());
         currentStepIndex = 0;
         startTime = 0;
@@ -620,6 +628,22 @@ public class GameController {
         showHighScores();
     }
 
+    /** Xử lý khóa khu vực nhập liệu **/
+    private void handleLock() {
+        sudokuBoard.setDisable(true);
+        inputVbox.setDisable(true);
+        actionVbox.setDisable(true);
+    }
+
+    /** Xử lý mở khóa khu vực nhập liệu **/
+    private void handleUnlock() {
+        sudokuBoard.setDisable(false);
+        inputVbox.setDisable(false);
+        actionVbox.setDisable(false);
+        exportButton.setDisable(false);
+        restartButton.setDisable(false);
+    }
+
     /**
      * FIX: Kiểm tra lỗi + đổi màu ngay khi nhập
      * Chỉ tăng mistakes nếu nhập SAI (so với solution)
@@ -653,8 +677,8 @@ public class GameController {
         // Validate ngay lập tức - đổi màu các ô trùng
         boolean hasConflict = sudokuBoard.validateBoard();
 
-        // Chỉ tăng mistakes nếu nhập SAI (không phải chỉ trùng conflict)
-        if (!isCorrect && oldValue != value) {
+        // Chỉ tăng mistakes nếu nhập SAI (trùng hàng/cột/cụm)
+        if (hasConflict && oldValue != value) {
             mistakes++;
             appendLog("❌ Wrong number at (" + (selectedRow+1) + "," + (selectedCol+1) + ")");
 
@@ -666,7 +690,7 @@ public class GameController {
                     playStatusLabel.setText("GAME OVER");
                     playStatusLabel.setStyle("-fx-text-fill: #ff3355; -fx-font-weight: bold;");
                 }
-                sudokuBoard.setDisable(true);  // FIX: Vô hiệu hóa board
+                handleLock();
             }
         } else {
             appendLog("✓ (" + (selectedRow+1) + "," + (selectedCol+1) + ") = " + value);
@@ -768,6 +792,7 @@ public class GameController {
                 solutionBoard = result.getFinalBoard() != null ? result.getFinalBoard() : solutionBoard;
             }
 
+            handleUnlock();
             refreshSolver();
             resetStats();
             mistakes = 0;
@@ -820,8 +845,7 @@ public class GameController {
         StringBuilder sb = new StringBuilder();
         sb.append("🏆 HIGH SCORES - Best Times 🏆\n\n");
         for (Difficulty diff : Difficulty.values()) {
-            sb.append(diff.name()).append(": ")
-                    .append(highScoreManager.getHighScoreDisplay(diff))
+            sb.append(highScoreManager.getHighScoreDisplay(diff))
                     .append("\n");
         }
 
@@ -845,6 +869,26 @@ public class GameController {
     @FXML
     private void onReset() {
         resetToOriginal();
+    }
+
+    @FXML
+    private void onRestart() {
+        resetToOriginal();
+        startPlayTimer();
+        mistakes = 0;
+        hintsUsed = 0;
+        gameOver = false;
+        moveHistory.clear();
+        if (sudokuBoard != null) {
+            sudokuBoard.setDisable(false);
+        }
+        if (playStatusLabel != null) {
+            playStatusLabel.setText("READY");
+            playStatusLabel.setStyle("");
+        }
+        refreshSolver();
+        resetStats();
+        updatePlayStats();
     }
 
     // ==================== COMPARE MODE METHODS ====================
