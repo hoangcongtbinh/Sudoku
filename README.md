@@ -17,7 +17,7 @@
 ## 📸 Giao diện ứng dụng
 
 <details>
-  <summary><b>▶️ PLAY Mode (Click để mở rộng)</b></summary>
+  <summary><b>▶️ PLAY Mode </b></summary>
   <p align="center">
     <img src="play.png" width="800"><br>
     <i>Chơi trực tiếp, nhập số, gợi ý, theo dõi tiến độ</i>
@@ -25,7 +25,7 @@
 </details>
 
 <details>
-  <summary><b>🔍 SOLVE Mode (Click để mở rộng)</b></summary>
+  <summary><b>🔍 SOLVE Mode </b></summary>
   <p align="center">
     <img src="solve.png" width="800"><br>
     <i>Trực quan hóa từng bước giải với thống kê realtime</i>
@@ -33,14 +33,12 @@
 </details>
 
 <details>
-  <summary><b>📊 COMPARE Mode (Click để mở rộng)</b></summary>
+  <summary><b>📊 COMPARE Mode </b></summary>
   <p align="center">
     <img src="compare.png" width="800"><br>
     <i>So sánh hiệu năng 3 thuật toán trên cùng một bàn cờ</i>
   </p>
 </details>
-
-</div>
 
 > **Giao diện nổi bật:** Theme tối (Dark) với hiệu ứng phát sáng Neon xanh, chia 3 tab rõ ràng: **PLAY · SOLVE · COMPARE**
 
