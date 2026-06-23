@@ -40,8 +40,8 @@ public class SolverComparisonTest {
         System.out.println("SA: " + SA_solution.getSteps().size());
 
         System.out.printf("\nThời gian giải:\n");
-        System.out.println("MRV: " + MRV_solution.getTimeToSolve() + " ns");
-        System.out.println("Backtracking: " + Backtracking_solution.getTimeToSolve() + " ns");
-        System.out.println("SA: " + SA_solution.getTimeToSolve() + " ns");
+        System.out.println("MRV: " + MRV_solution.getDurationNanos() + " ns");
+        System.out.println("Backtracking: " + Backtracking_solution.getDurationNanos() + " ns");
+        System.out.println("SA: " + SA_solution.getDurationNanos() + " ns");
     }
 }

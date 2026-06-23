@@ -216,18 +216,17 @@ public class PuzzleIOTest {
     @Test
     public void testPuzzleIOService_Integration() throws IOException {
         Path filePath = tempDir.resolve("service_board.txt");
-        PuzzleIOService service = new PuzzleIOService();
 
         // Save using service
-        service.savePuzzle(validBoard, filePath.toString());
+        PuzzleIOService.writeToFile(filePath.toFile(), validBoard.getValues());
         assertTrue(filePath.toFile().exists());
 
         // Load using service
-        Board loadedBoard = service.loadPuzzle(filePath.toString());
-        assertNotNull(loadedBoard);
+        int[][] loadedGrid = PuzzleIOService.readFromFile(filePath.toFile());
+        assertNotNull(loadedGrid);
         for (int r = 0; r < 9; r++) {
             for (int c = 0; c < 9; c++) {
-                assertEquals(validBoard.getCell(r, c), loadedBoard.getCell(r, c));
+                assertEquals(validBoard.getCell(r, c), loadedGrid[r][c]);
             }
         }
     }
