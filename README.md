@@ -19,27 +19,22 @@
 
 <div align="center">
 
-**PLAY Mode**
-
-![Play Mode](docs/screenshot-play.png)
-
+### 🎮 PLAY Mode
+![Play Mode](<img width="881" height="900" alt="image" src="https://github.com/user-attachments/assets/913acc85-8ac6-4164-bf48-ddd628a825a7" />)
 *Chơi trực tiếp, nhập số, gợi ý*
 
----
+<br>
 
-**SOLVE Mode**
-
-![Solve Mode](docs/screenshot-solve.png)
-
+### 🔍 SOLVE Mode
+![Solve Mode](<img width="881" height="900" alt="image" src="https://github.com/user-attachments/assets/317ad7da-376a-4983-b1b6-84eee97e99b9" />)
 *Trực quan hóa từng bước giải*
 
----
+<br>
 
-**COMPARE Mode**
-
-![Compare Mode](docs/screenshot-compare.png)
-
+### 📊 COMPARE Mode
+![Compare Mode](<img width="881" height="900" alt="image" src="https://github.com/user-attachments/assets/ba38272a-2280-46ea-af22-541f114bb7be" />)
 *So sánh hiệu năng 3 thuật toán*
+
 </div>
 
 > **Giao diện nổi bật:** Theme tối (Dark) với hiệu ứng phát sáng Neon xanh, chia 3 tab rõ ràng: **PLAY · SOLVE · COMPARE**
