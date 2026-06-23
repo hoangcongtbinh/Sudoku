@@ -1,4 +1,4 @@
-# 🧩 2526II-Sudoku
+# 🧩 AIT2004 - Nhóm 7 - Sudoku
 
 <div align="center">
 
@@ -9,7 +9,7 @@
 
 **Hệ thống Trò chơi và Phòng thí nghiệm Thuật toán Sudoku**
 
-*Xây dựng bằng Java + JavaFX · Nhóm sinh viên lớp 2526II*
+*Xây dựng bằng Java + JavaFX · Nhóm 7 — Môn Cơ sở Trí tuệ nhân tạo (AIT2004)*
 
 </div>
 
@@ -61,7 +61,7 @@
 
 ## 👥 Thành viên dự án
 
-Dự án được nghiên cứu và phát triển bởi nhóm sinh viên lớp **2526II**:
+Dự án được nghiên cứu và phát triển bởi nhóm sinh viên lớp **AIT2004# 4**:
 
 | STT | Họ và tên | MSSV |
 |:---:|:---|:---:|
@@ -432,15 +432,15 @@ mvn exec:java -Dexec.mainClass="com.sudoku.benchmark.BenchmarkMain"
 
 | Thao tác | Hành động |
 |:---|:---|
-| **NEW GAME** | Tạo đề mới, chọn độ khó từ dropdown |
-| Click ô | Chọn ô muốn điền |
-| Nhấn `1`–`9` hoặc nút Input | Điền số vào ô đang chọn |
-| **ERASE** | Xóa số trong ô đang chọn |
-| **HINT** | Gợi ý 1 ô chính xác |
-| **UNDO** | Hoàn tác thao tác vừa thực hiện |
-| **CHECK SOLUTION** | Kiểm tra toàn bộ đáp án |
-| **IMPORT / EXPORT** | Tải puzzle từ file / Lưu puzzle ra file |
-| **HIGH SCORES** | Xem bảng xếp hạng |
+| **NEW GAME** | **Tạo đề mới, chọn độ khó từ dropdown** |
+| **Click ô**| **Chọn ô muốn điền** |
+| **Nhấn `1`–`9` hoặc nút Input** | **Điền số vào ô đang chọn** |
+| **ERASE** | **Xóa số trong ô đang chọn** |
+| **HINT** | **Gợi ý 1 ô chính xác** |
+| **UNDO** | **Hoàn tác thao tác vừa thực hiện** |
+| **CHECK SOLUTION** | **Kiểm tra toàn bộ đáp án** |
+| **IMPORT / EXPORT** | **Tải puzzle từ file / Lưu puzzle ra file** |
+| **HIGH SCORES** | **Xem bảng xếp hạng** |
 
 ### Tab SOLVE — Giải tự động
 
@@ -477,6 +477,6 @@ Dự án được phát hành theo giấy phép **MIT License**.
 
 <div align="center">
 
-Made with ❤️ by **Nhom 2526II** · Viện Trí Tuệ Nhân Tạo
+Made with ❤️ by **Nhom 7** · Viện Trí Tuệ Nhân Tạo
 
 </div>
