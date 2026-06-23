@@ -20,21 +20,21 @@
 <div align="center">
 
 ### ▶️ PLAY Mode
-<img src="docs/Chụp_màn_hình_từ_2026-06-23_20-46-01.png" width="800"/>
+<img src="play.png" width="800"/>
 
 *Chơi trực tiếp, nhập số, gợi ý, theo dõi tiến độ*
 
 <br><br>
 
 ### 🔍 SOLVE Mode
-<img src="docs/Chụp_màn_hình_từ_2026-06-23_20-43-59.png" width="800"/>
+<img src="solve.png" width="800"/>
 
 *Trực quan hóa từng bước giải với thống kê realtime*
 
 <br><br>
 
 ### 📊 COMPARE Mode
-<img src="docs/Chụp_màn_hình_từ_2026-06-23_20-44-32.png" width="800"/>
+<img src="compare.png" width="800"/>
 
 *So sánh hiệu năng 3 thuật toán trên cùng một bàn cờ*
 
