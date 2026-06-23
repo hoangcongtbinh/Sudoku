@@ -18,10 +18,6 @@
 ## 📸 Giao diện ứng dụng
 
 <div align="center">
-    
-## 📸 Giao diện ứng dụng
-
-<div align="center">
 
 ### ▶️ PLAY Mode
 <img src="docs/Chụp_màn_hình_từ_2026-06-23_20-46-01.png" width="800"/>
