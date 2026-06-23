@@ -19,12 +19,11 @@
 
 <div align="center">
 
-| PLAY Mode | SOLVE Mode | COMPARE Mode |
-|:---:|:---:|:---:|
-| ![Play Mode](<img width="880" height="937" alt="image" src="https://github.com/user-attachments/assets/6105326b-0243-4ae8-9c0c-45534f290a5a" />
-) | ![Solve Mode](docs/screenshot-solve.png) | ![Compare Mode](docs/screenshot-compare.png) |
-| *Chơi trực tiếp, nhập số, gợi ý* | *Trực quan hóa từng bước giải* | *So sánh hiệu năng 3 thuật toán* |
-
+| Mode | Ảnh | Mô tả |
+|:---:|:---:|:---|
+| **PLAY Mode** | ![Play Mode](<img width="878" height="906" alt="image" src="https://github.com/user-attachments/assets/e484a68a-0596-4007-903f-bf203abce6bd" />) | *Chơi trực tiếp, nhập số, gợi ý* |
+| **SOLVE Mode** | ![Solve Mode](<img width="878" height="906" alt="image" src="https://github.com/user-attachments/assets/2dd287f0-ac74-4ff3-a430-7b284c346740" />) | *Trực quan hóa từng bước giải* |
+| **COMPARE Mode** | ![Compare Mode](<img width="878" height="906" alt="image" src="https://github.com/user-attachments/assets/4bc6efdc-bf98-4bb4-9039-81c1e70abadf" />) | *So sánh hiệu năng 3 thuật toán* |
 </div>
 
 > **Giao diện nổi bật:** Theme tối (Dark) với hiệu ứng phát sáng Neon xanh, chia 3 tab rõ ràng: **PLAY · SOLVE · COMPARE**
