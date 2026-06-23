@@ -556,7 +556,7 @@
     }
     /* ProgressBar default (slower) */
     .progress-bar.compare-bar .track { -fx-background-color: #1a2535; -fx-background-radius: 1; }
-    .progress-bar.compare-bar .bar   { -fx-background-color: #1e3050; -fx-background-radius: 1; -fx-border-color: transparent; -fx-background-insets: 0; }
+    .progress-bar.compare-bar .bar   { -fx-background-color: #ffaa00; -fx-background-radius: 1; -fx-border-color: transparent; -fx-background-insets: 0; }
     /* Best (fastest) bar */
     .progress-bar.compare-bar-best .bar {
         -fx-background-color: #00ff88;
@@ -565,6 +565,12 @@
     }
     /* Second best */
     .progress-bar.compare-bar-second .bar { -fx-background-color: #ffaa00; -fx-background-radius: 1; }
+    /* Error / Failed bar */
+    .progress-bar.compare-bar-error .bar {
+        -fx-background-color: #ff3355;
+        -fx-background-radius: 1;
+        -fx-effect: dropshadow(gaussian, #ff3355, 4, 0.3, 0, 0);
+    }
 
 
     /* ── BOTTOM CONTROL BAR ───────────────────────────────────────────────── */

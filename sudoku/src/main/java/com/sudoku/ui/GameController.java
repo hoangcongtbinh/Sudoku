@@ -8,6 +8,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
@@ -904,11 +905,11 @@ public class GameController {
 
         TableColumn<AlgorithmStats, String> nameCol = new TableColumn<>("Algorithm");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("algorithmName"));
-        nameCol.setPrefWidth(140);
+        nameCol.setPrefWidth(85);
 
-        TableColumn<AlgorithmStats, Number> timeCol = new TableColumn<>("Time (ms)");
+        TableColumn<AlgorithmStats, Number> timeCol = new TableColumn<>("ms");
         timeCol.setCellValueFactory(new PropertyValueFactory<>("timeMs"));
-        timeCol.setPrefWidth(90);
+        timeCol.setPrefWidth(50);
         timeCol.setCellFactory(col -> new TableCell<AlgorithmStats, Number>() {
             @Override
             protected void updateItem(Number item, boolean empty) {
@@ -923,15 +924,15 @@ public class GameController {
 
         TableColumn<AlgorithmStats, Number> stepsCol = new TableColumn<>("Steps");
         stepsCol.setCellValueFactory(new PropertyValueFactory<>("totalSteps"));
-        stepsCol.setPrefWidth(70);
+        stepsCol.setPrefWidth(45);
 
-        TableColumn<AlgorithmStats, Number> backCol = new TableColumn<>("Backtracks");
+        TableColumn<AlgorithmStats, Number> backCol = new TableColumn<>("BT");
         backCol.setCellValueFactory(new PropertyValueFactory<>("backtracks"));
-        backCol.setPrefWidth(80);
+        backCol.setPrefWidth(40);
 
-        TableColumn<AlgorithmStats, Boolean> bestCol = new TableColumn<>("Best?");
+        TableColumn<AlgorithmStats, Boolean> bestCol = new TableColumn<>("Best");
         bestCol.setCellValueFactory(new PropertyValueFactory<>("best"));
-        bestCol.setPrefWidth(60);
+        bestCol.setPrefWidth(35);
         bestCol.setCellFactory(col -> new TableCell<AlgorithmStats, Boolean>() {
             @Override
             protected void updateItem(Boolean item, boolean empty) {
@@ -963,16 +964,16 @@ public class GameController {
 
         AlgorithmComparison comparison = new AlgorithmComparison();
         if (runBacktracking) {
-            comparison.addAlgorithm("Backtracking", new BacktrackingSolver());
+            comparison.addSolver("Backtracking", new BacktrackingSolver());
         }
         if (runMRV) {
-            comparison.addAlgorithm("MRV", new MRVSolver());
+            comparison.addSolver("MRV", new MRVSolver());
         }
         if (runSA) {
-            comparison.addAlgorithm("Simulated Annealing", new SASolver());
+            comparison.addSolver("Simulated Annealing", new SASolver());
         }
 
-        List<AlgorithmStats> results = comparison.runComparison(currentBoard.copy());
+        List<AlgorithmStats> results = comparison.compare(currentBoard.copy());
 
         // FIX: Hiển thị kết quả lên table
         if (compareTable != null) {
@@ -984,31 +985,43 @@ public class GameController {
         if (compareBars != null) {
             compareBars.getChildren().clear();
             double maxTime = results.stream()
-                    .mapToDouble(AlgorithmStats::getTimeMs)
+                    .mapToDouble(AlgorithmStats::getElapsedTimeMillis)
                     .max().orElse(1.0);
 
             for (AlgorithmStats stat : results) {
                 HBox barRow = new HBox(10);
-                barRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                barRow.setAlignment(Pos.CENTER_LEFT);
                 barRow.getStyleClass().add("compare-bar-row");
 
                 Label nameLabel = new Label(stat.getAlgorithmName());
                 nameLabel.getStyleClass().add("compare-bar-label");
-                nameLabel.setMinWidth(140);
-                nameLabel.setMaxWidth(140);
+                nameLabel.setMinWidth(80);
+                nameLabel.setMaxWidth(80);
 
-                double ratio = maxTime > 0 ? stat.getTimeMs() / maxTime : 0;
+                double ratio = maxTime > 0 ? stat.getElapsedTimeMillis() / maxTime : 0;
                 ProgressBar bar = new ProgressBar(ratio);
-                bar.setPrefWidth(250);
-                bar.setPrefHeight(20);
+                bar.setPrefWidth(100);
+                bar.setPrefHeight(15);
                 bar.getStyleClass().add("compare-bar");
-                if (stat.isBest()) {
-                    bar.getStyleClass().add("compare-bar-best");
+                if (stat.isSolved()) {
+                    if (stat.isBest()) {
+                        bar.getStyleClass().add("compare-bar-best");
+                    } else if (stat.isSecondBest()) {
+                        bar.getStyleClass().add("compare-bar-second");
+                    }
+                } else {
+                    bar.getStyleClass().add("compare-bar-error");
                 }
 
-                Label timeLabel = new Label(String.format("%.2f ms", stat.getTimeMs()));
+                String timeText;
+                if (!stat.isSolved()) {
+                    timeText = "Failed";
+                } else {
+                    timeText = String.format("%.2f ms", stat.getElapsedTimeMillis());
+                }
+                Label timeLabel = new Label(timeText);
                 timeLabel.getStyleClass().add("stats-value");
-                timeLabel.setMinWidth(80);
+                timeLabel.setMinWidth(60);
 
                 barRow.getChildren().addAll(nameLabel, bar, timeLabel);
                 compareBars.getChildren().add(barRow);
