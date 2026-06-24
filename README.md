@@ -200,19 +200,19 @@ Dự án kết hợp mô hình **MVC** với kiến trúc **phân lớp** rõ r�
 |   DifficultySelector   AlgorithmSelector            |
 |   StatsPanel   StepLogPanel                         |
 +-----------------------------------------------------+
-|             TANG DIEU PHOI (Controller)              |
+|             TANG DIEU PHOI (Controller)             |
 |                 GameController.java                 |
 +----------------------+------------------------------+
-|   TANG NGHIEP VU     |      TANG GIAI THUAT        |
-|  BoardValidator      |  Solver  (interface)        |
-|  BoardGenerator      |  BacktrackingSolver         |
-|  HighScoreManager    |  MRVSolver                  |
-|  PuzzleReader/Writer |  SASolver                   |
+|   TANG NGHIEP VU     |      TANG GIAI THUAT         |
+|  BoardValidator      |  Solver  (interface)         |
+|  BoardGenerator      |  BacktrackingSolver          |
+|  HighScoreManager    |  MRVSolver                   |
+|  PuzzleReader/Writer |  SASolver                    |
 +----------------------+------------------------------+
-|                TANG DU LIEU (Model)                  |
+|                TANG DU LIEU (Model)                 |
 |       Board   GameSession   Step   Difficulty       |
 +-----------------------------------------------------+
-|              TANG DO LUONG (Benchmark)               |
+|              TANG DO LUONG (Benchmark)              |
 |    AlgorithmComparison   AlgorithmStats             |
 +-----------------------------------------------------+
 ```
